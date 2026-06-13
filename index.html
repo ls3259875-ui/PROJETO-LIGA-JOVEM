@@ -10,7 +10,6 @@
            1. VARIÁVEIS CSS (THEME SWITCHER)
            ========================================= */
         :root {
-            /* TEMA FUTURISTA (Padrão) */
             --bg-color: #0b0f19;
             --surface-color: #1a2235;
             --text-primary: #e2e8f0;
@@ -29,12 +28,11 @@
         }
 
         [data-theme="classic"] {
-            /* TEMA CLÁSSICO */
             --bg-color: #f4ecd8;
             --surface-color: #fff9e6;
             --text-primary: #2c1e16;
             --text-secondary: #5c4a3d;
-            --accent-color: #b8860b; /* Ouro */
+            --accent-color: #b8860b;
             --accent-hover: #996b09;
             --danger-color: #8b0000;
             --warning-color: #d2691e;
@@ -161,7 +159,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Cartões Base */
         .card {
             background-color: var(--surface-color);
             border-radius: var(--border-radius);
@@ -172,7 +169,7 @@
         }
 
         /* =========================================
-           5. VISÃO DO ALUNO
+           5. VISÃO DO ALUNO & QUESTÕES
            ========================================= */
         .student-header {
             display: flex;
@@ -199,6 +196,15 @@
             font-weight: bold;
         }
 
+        .question-block {
+            display: none;
+        }
+
+        .question-block.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
         .question-area h2 {
             margin-bottom: 1.5rem;
             font-size: 1.5rem;
@@ -223,6 +229,20 @@
         .option:hover {
             border-color: var(--accent-color);
             background: rgba(255, 255, 255, 0.02);
+        }
+
+        /* Estilo para a opção selecionada */
+        .option.selected {
+            background-color: rgba(0, 255, 204, 0.1);
+            border-color: var(--accent-color);
+            box-shadow: 0 0 10px rgba(0, 255, 204, 0.2);
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+
+        [data-theme="classic"] .option.selected {
+            background-color: rgba(184, 134, 11, 0.1);
+            box-shadow: 0 0 10px rgba(184, 134, 11, 0.2);
         }
 
         .shop-area {
@@ -265,13 +285,14 @@
             gap: 0.5rem;
         }
 
-        input, textarea {
+        input[type="text"], input[type="number"], textarea, input[type="file"] {
             background-color: rgba(0,0,0,0.1);
             border: 1px solid var(--text-secondary);
             color: var(--text-primary);
             padding: 10px;
             border-radius: 4px;
             font-family: var(--font-main);
+            width: 100%;
         }
 
         input:focus, textarea:focus {
@@ -279,10 +300,23 @@
             border-color: var(--accent-color);
         }
 
-        /* Tabela de Alunos */
-        .student-list {
-            list-style: none;
+        input[type="file"]::file-selector-button {
+            background-color: var(--surface-color);
+            color: var(--text-primary);
+            border: 1px solid var(--text-secondary);
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+            transition: var(--transition);
         }
+
+        input[type="file"]::file-selector-button:hover {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+
+        .student-list { list-style: none; }
 
         .student-row {
             display: flex;
@@ -330,7 +364,6 @@
 
     <main>
         <section id="view-aluno" class="view-section active">
-            
             <div class="student-header">
                 <div class="hud-stats">
                     <div class="hud-item" title="Tempo Restante">
@@ -344,13 +377,40 @@
             </div>
 
             <div class="card question-area">
-                <h2>Questão 1: Em uma aplicação web, qual evento JavaScript é disparado quando o usuário muda de aba ou minimiza o navegador, permitindo a criação de sistemas anti-cola?</h2>
-                <div class="options">
-                    <div class="option">A) window.onblur</div>
-                    <div class="option">B) document.visibilitychange</div>
-                    <div class="option">C) screen.onleave</div>
-                    <div class="option">D) navigator.away</div>
+                
+                <div class="question-block active" id="question-1">
+                    <h2>Questão 1: Em uma aplicação web, qual evento JavaScript é disparado quando o usuário muda de aba ou minimiza o navegador, permitindo a criação de sistemas anti-cola?</h2>
+                    <div class="options">
+                        <div class="option" onclick="selectOption(this)">A) window.onblur</div>
+                        <div class="option" onclick="selectOption(this)">B) document.visibilitychange</div>
+                        <div class="option" onclick="selectOption(this)">C) screen.onleave</div>
+                        <div class="option" onclick="selectOption(this)">D) navigator.away</div>
+                    </div>
+                    <button class="btn-primary" onclick="nextQuestion(1)">Confirmar e Avançar</button>
                 </div>
+
+                <div class="question-block" id="question-2">
+                    <h2>Questão 2: Qual a principal finalidade da tag HTML <code>&lt;canvas&gt;</code>?</h2>
+                    <div class="options">
+                        <div class="option" onclick="selectOption(this)">A) Reproduzir áudio e vídeo de forma nativa.</div>
+                        <div class="option" onclick="selectOption(this)">B) Renderizar gráficos 2D e 3D dinamicamente via JavaScript.</div>
+                        <div class="option" onclick="selectOption(this)">C) Criar tabelas responsivas automaticamente.</div>
+                        <div class="option" onclick="selectOption(this)">D) Estilizar elementos usando variáveis CSS.</div>
+                    </div>
+                    <button class="btn-primary" onclick="nextQuestion(2)">Confirmar e Avançar</button>
+                </div>
+
+                <div class="question-block" id="question-3">
+                    <h2>Questão 3: O que significa a sigla "API" no contexto de desenvolvimento de software?</h2>
+                    <div class="options">
+                        <div class="option" onclick="selectOption(this)">A) Application Programming Interface</div>
+                        <div class="option" onclick="selectOption(this)">B) Automated Process Integration</div>
+                        <div class="option" onclick="selectOption(this)">C) Advanced Protocol Instruction</div>
+                        <div class="option" onclick="selectOption(this)">D) Asynchronous Programming Index</div>
+                    </div>
+                    <button class="btn-primary" onclick="alert('Prova Finalizada com Sucesso!')">Finalizar Avaliação</button>
+                </div>
+
             </div>
 
             <div class="card">
@@ -362,7 +422,7 @@
                     <button class="btn-primary" onclick="buyHint()">Comprar Dica (-5 Créditos)</button>
                 </div>
                 <div id="hint-display">
-                    <strong>Dica do Professor:</strong> Preste atenção ao prefixo. A API moderna está ligada ao documento (document) e usa a palavra "visibility".
+                    <strong>Dica do Professor:</strong> Leia com atenção o enunciado e elimine as respostas que não fazem sentido com a tecnologia abordada na questão atual.
                 </div>
             </div>
         </section>
@@ -400,23 +460,36 @@
                     </ul>
                 </div>
 
-                <div class="card">
-                    <h2 style="margin-bottom: 1.5rem;">Configurar Questão & Lojinha</h2>
-                    <form onsubmit="event.preventDefault(); alert('Prova atualizada com sucesso para a turma!');">
-                        <div class="form-group">
-                            <label>Enunciado da Questão</label>
-                            <textarea rows="3">Em uma aplicação web, qual evento JavaScript...</textarea>
-                        </div>
-                        <div class="form-group">
-                            <label>Dica Vendida (Lojinha)</label>
-                            <textarea rows="2">Preste atenção ao prefixo. A API moderna está ligada ao documento...</textarea>
-                        </div>
-                        <div class="form-group">
-                            <label>Custo da Dica</label>
-                            <input type="number" value="5" style="width: 100px;">
-                        </div>
-                        <button type="submit" class="btn-primary" style="margin-top: 1rem; width: 100%;">Atualizar Banco de Dados</button>
-                    </form>
+                <div>
+                    <div class="card">
+                        <h2 style="margin-bottom: 1.5rem;">Configurar Questão & Lojinha</h2>
+                        <form onsubmit="event.preventDefault(); alert('Prova atualizada com sucesso para a turma!');">
+                            <div class="form-group">
+                                <label>Enunciado da Questão</label>
+                                <textarea rows="3">Em uma aplicação web, qual evento JavaScript...</textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Dica Vendida (Lojinha)</label>
+                                <textarea rows="2">Preste atenção ao prefixo. A API moderna está ligada ao documento...</textarea>
+                            </div>
+                            <div class="form-group">
+                                <label>Custo da Dica</label>
+                                <input type="number" value="5" style="width: 100px;">
+                            </div>
+                            <button type="submit" class="btn-primary" style="margin-top: 1rem; width: 100%;">Atualizar Banco de Dados</button>
+                        </form>
+                    </div>
+
+                    <div class="card">
+                        <h2 style="margin-bottom: 1.5rem;">Materiais de Apoio</h2>
+                        <form onsubmit="event.preventDefault(); alert('Arquivo enviado com sucesso!');">
+                            <div class="form-group">
+                                <label>Fazer Upload de Gabarito ou Notas (Apenas Texto)</label>
+                                <input type="file" accept=".txt" required>
+                            </div>
+                            <button type="submit" class="btn-secondary" style="width: 100%;">Enviar Arquivo .TXT</button>
+                        </form>
+                    </div>
                 </div>
 
             </div>
@@ -429,24 +502,61 @@
            ========================================= */
         let currentCoins = 15;
         const HINT_COST = 5;
-        let currentTheme = 'futuristic'; // 'futuristic' ou 'classic'
+        let currentTheme = 'futuristic';
         let hasCheated = false;
 
         /* =========================================
            1. NAVEGAÇÃO DE ABAS
            ========================================= */
         function switchTab(tabId) {
-            // Atualiza botões
             document.querySelectorAll('.nav-tabs button').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
 
-            // Atualiza views
             document.querySelectorAll('.view-section').forEach(view => view.classList.remove('active'));
             document.getElementById(`view-${tabId}`).classList.add('active');
         }
 
         /* =========================================
-           2. THEME SWITCHER
+           2. SISTEMA DE QUESTÕES (CLIQUE E NAVEGAÇÃO)
+           ========================================= */
+        
+        // Função para selecionar a alternativa
+        function selectOption(clickedElement) {
+            // Pega o contêiner pai (a div .options atual)
+            const parentOptions = clickedElement.parentElement;
+            
+            // Remove a classe 'selected' de todas as alternativas daquela questão
+            const allOptions = parentOptions.querySelectorAll('.option');
+            allOptions.forEach(option => option.classList.remove('selected'));
+            
+            // Adiciona a classe 'selected' apenas na clicada
+            clickedElement.classList.add('selected');
+        }
+
+        // Função para avançar de questão
+        function nextQuestion(currentQuestionId) {
+            const currentBlock = document.getElementById(`question-${currentQuestionId}`);
+            
+            // Verifica se o aluno selecionou alguma alternativa antes de avançar
+            const selectedOption = currentBlock.querySelector('.option.selected');
+            if (!selectedOption) {
+                alert("Por favor, selecione uma alternativa antes de avançar!");
+                return;
+            }
+
+            const nextBlock = document.getElementById(`question-${currentQuestionId + 1}`);
+            
+            if (nextBlock) {
+                currentBlock.classList.remove('active');
+                nextBlock.classList.add('active');
+                
+                // Oculta a dica novamente ao trocar de questão
+                document.getElementById('hint-display').style.display = 'none';
+            }
+        }
+
+        /* =========================================
+           3. THEME SWITCHER
            ========================================= */
         function toggleTheme() {
             const body = document.body;
@@ -464,7 +574,7 @@
         }
 
         /* =========================================
-           3. SISTEMA DA LOJINHA
+           4. SISTEMA DA LOJINHA
            ========================================= */
         function buyHint() {
             if (hasCheated) {
@@ -473,31 +583,24 @@
             }
 
             if (currentCoins >= HINT_COST) {
-                // Subtrai moedas
                 currentCoins -= HINT_COST;
                 document.getElementById('coin-amount').innerText = currentCoins;
                 
-                // Exibe Dica
                 const hintEl = document.getElementById('hint-display');
                 hintEl.style.display = 'block';
-                
-                // Animação de fade in
                 hintEl.style.opacity = '0';
                 setTimeout(() => { hintEl.style.transition = 'opacity 0.5s'; hintEl.style.opacity = '1'; }, 10);
 
-                // Atualiza Radar do Professor
                 updateTeacherDashboard('status-dica', 'Comprou Dica');
-
             } else {
                 alert(`Saldo insuficiente! Você precisa de ${HINT_COST} créditos.`);
             }
         }
 
         /* =========================================
-           4. SISTEMA ANTI-COLA (VISIBILITY API)
+           5. SISTEMA ANTI-COLA (VISIBILITY API)
            ========================================= */
         document.addEventListener('visibilitychange', () => {
-            // Se a página for ocultada (mudança de aba, minimização)
             if (document.hidden && !hasCheated) {
                 triggerAntiCheat();
             }
@@ -506,31 +609,26 @@
         function triggerAntiCheat() {
             hasCheated = true;
             
-            // Punição Gamificada: Zera as moedas
             currentCoins = 0;
             document.getElementById('coin-amount').innerText = currentCoins;
             document.getElementById('coin-amount').style.color = 'var(--danger-color)';
             
-            // Alerta Educativo
             alert("⚠️ ALERTA DE INFRAÇÃO ⚠️\nDetectamos que você saiu da tela da prova.\nSeus créditos foram zerados e o professor foi notificado.");
             
-            // Atualiza Radar do Professor em Tempo Real
             updateTeacherDashboard('status-infracao', 'Tentou Colar');
         }
 
         /* =========================================
-           5. UTILITÁRIOS (CRONÔMETRO E DASHBOARD)
+           6. UTILITÁRIOS (CRONÔMETRO E DASHBOARD)
            ========================================= */
         function updateTeacherDashboard(statusClass, statusText) {
             const dashIndicator = document.getElementById('dashboard-current-student');
             const dashText = document.getElementById('dashboard-status-text');
             
-            // Remove classes antigas
             dashIndicator.className = `status-indicator ${statusClass}`;
             dashText.innerText = statusText;
         }
 
-        // Cronômetro Simples
         let timeInSeconds = 15 * 60;
         setInterval(() => {
             if (timeInSeconds > 0) {
@@ -545,3 +643,4 @@
     </script>
 </body>
 </html>
+
