@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LIGA JOVEM 2026 - Avaliação Gamificada Segura</title>
+    <title>Liga Jovem 2026 - Avaliação Gamificada Segura</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Orbitron:wght@500;700&family=Lora:ital,wght@0,400;0,600&family=Cinzel:wght@600&display=swap" rel="stylesheet">
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -229,6 +229,89 @@
         .status-infracao span { color: var(--danger-color); }
         .export-actions { display: flex; gap: 1rem; }
 
+        /* =========================================
+           4. MODAL INTERNO DO SISTEMA
+           ========================================= */
+        .site-modal-backdrop {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.55);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            padding: 1rem;
+        }
+
+        .site-modal-backdrop.active {
+            display: flex;
+        }
+
+        .site-modal {
+            width: min(560px, 100%);
+            border-radius: var(--border-radius);
+            background: var(--surface-color);
+            border: var(--card-border);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .site-modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .site-modal-title {
+            font-family: var(--font-display);
+            font-size: 1.1rem;
+            color: var(--accent-color);
+        }
+
+        .site-modal-close {
+            width: 40px;
+            height: 40px;
+            border-radius: 999px;
+            background: transparent;
+            color: var(--text-primary);
+            border: 1px solid rgba(255,255,255,0.12);
+            font-size: 1.2rem;
+            line-height: 1;
+            margin-top: 0;
+        }
+
+        .site-modal-close:hover {
+            background: rgba(255,255,255,0.05);
+        }
+
+        .site-modal-body {
+            padding: 1.25rem;
+            white-space: pre-line;
+            line-height: 1.6;
+            color: var(--text-primary);
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .site-modal.modal-success .site-modal-body { border-left-color: var(--success-color); }
+        .site-modal.modal-warning .site-modal-body { border-left-color: var(--warning-color); }
+        .site-modal.modal-danger .site-modal-body { border-left-color: var(--danger-color); }
+
+        .site-modal-footer {
+            padding: 0 1.25rem 1.25rem;
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+        }
+
+        .site-modal.modal-success .site-modal-title { color: var(--success-color); }
+        .site-modal.modal-warning .site-modal-title { color: var(--warning-color); }
+        .site-modal.modal-danger .site-modal-title { color: var(--danger-color); }
+
     </style>
 </head>
 <body>
@@ -341,7 +424,7 @@
                 <div>
                     <div class="card">
                         <h2 style="margin-bottom: 1.5rem;">Configurar Questão</h2>
-                        <form onsubmit="event.preventDefault(); alert('Prova atualizada com sucesso!');">
+                        <form onsubmit="event.preventDefault(); showModal('Sucesso', 'Prova atualizada com sucesso!', 'success');">
                             <div class="form-group">
                                 <label>Enunciado da Questão</label>
                                 <textarea rows="3">Em uma aplicação web...</textarea>
@@ -352,7 +435,7 @@
 
                     <div class="card">
                         <h2 style="margin-bottom: 1.5rem;">Materiais de Apoio</h2>
-                        <form onsubmit="event.preventDefault(); alert('Arquivo enviado com sucesso!');">
+                        <form onsubmit="event.preventDefault(); showModal('Sucesso', 'Arquivo enviado com sucesso!', 'success');">
                             <div class="form-group">
                                 <label>Fazer Upload de Gabarito (Apenas Texto)</label>
                                 <input type="file" accept=".pdf, .doc, .docx" required>
@@ -367,21 +450,41 @@
     </main>
 
     <script>
-
         /* =========================================
            ESTADO DA APLICAÇÃO E BÁSICOS
            ========================================= */
-        const CONFIG = {
-            INITIAL_COINS: 100,
-            HINT_COST: 5,
-            MIN_COINS: 0
-        };
-
-        let currentCoins = CONFIG.INITIAL_COINS;
+        let currentCoins = 15;
+        const HINT_COST = 5;
         let currentTheme = 'futuristic';
         let hasCheated = false;
         let examStarted = false;
-        const pointHistory = [];
+
+        const modalBackdrop = document.getElementById('site-modal-backdrop');
+        const modalTitle = document.getElementById('site-modal-title');
+        const modalBody = document.getElementById('site-modal-body');
+
+        function showModal(title, message, type = 'info') {
+            modalTitle.textContent = title;
+            modalBody.textContent = message;
+            modalBackdrop.classList.add('active');
+            modalBackdrop.setAttribute('aria-hidden', 'false');
+            const modalCard = modalBackdrop.querySelector('.site-modal');
+            modalCard.classList.remove('modal-success', 'modal-warning', 'modal-danger');
+            modalCard.classList.add(`modal-${type}`);
+        }
+
+        function hideModal() {
+            modalBackdrop.classList.remove('active');
+            modalBackdrop.setAttribute('aria-hidden', 'true');
+        }
+
+        modalBackdrop.addEventListener('click', (e) => {
+            if (e.target === modalBackdrop) hideModal();
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && modalBackdrop.classList.contains('active')) hideModal();
+        });
 
         function switchTab(tabId) {
             document.querySelectorAll('.nav-tabs button').forEach(btn => btn.classList.remove('active'));
@@ -391,91 +494,11 @@
             document.getElementById(`view-${tabId}`).classList.add('active');
         }
 
-        function formatTime() {
-            const minutes = Math.floor(timeInSeconds / 60);
-            const seconds = timeInSeconds % 60;
-            return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-        }
-
-        function addPointHistory(type, amount, reason) {
-            pointHistory.unshift({
-                type,
-                amount,
-                reason,
-                time: new Date().toLocaleTimeString()
-            });
-
-            if (pointHistory.length > 20) {
-                pointHistory.pop();
-            }
-
-            console.log(`[PONTOS] ${type}: ${amount} | ${reason}`);
-        }
-
-        function updateCoinDisplay() {
-            const coinAmount = document.getElementById('coin-amount');
-            const coinValue = Math.max(currentCoins, CONFIG.MIN_COINS);
-            coinAmount.innerText = coinValue;
-
-            if (hasCheated) {
-                coinAmount.style.color = 'var(--danger-color)';
-            } else if (coinValue === 0) {
-                coinAmount.style.color = 'var(--warning-color)';
-            } else {
-                coinAmount.style.color = '';
-            }
-        }
-
-        function updateTeacherDashboard(statusClass, statusText) {
-            const dashIndicator = document.getElementById('dashboard-current-student');
-            const dashText = document.getElementById('dashboard-status-text');
-            dashIndicator.className = `status-indicator ${statusClass}`;
-            dashText.innerText = statusText;
-        }
-
-        function updatePoints(delta, reason) {
-            const nextValue = Math.max(currentCoins + delta, CONFIG.MIN_COINS);
-            const appliedDelta = nextValue - currentCoins;
-            currentCoins = nextValue;
-            updateCoinDisplay();
-            addPointHistory(appliedDelta >= 0 ? 'ganho' : 'perda', appliedDelta, reason);
-            return currentCoins;
-        }
-
-        function setPoints(value, reason) {
-            currentCoins = Math.max(value, CONFIG.MIN_COINS);
-            updateCoinDisplay();
-            addPointHistory('ajuste', currentCoins, reason);
-        }
-
-        function applyCheatPenalty(reason) {
-            if (hasCheated) return;
-
-            const before = currentCoins;
-            const after = Math.floor(before / 2); // 20->10, 15->7, 1->0
-            currentCoins = after;
-            hasCheated = true;
-
-            updateCoinDisplay();
-            addPointHistory('penalidade', before - after, `Tentativa de cola: ${reason}`);
-
-            alert(
-                `⚠️ ALERTA DE INFRAÇÃO ⚠️\n` +
-                `Motivo: ${reason}\n` +
-                `Penalidade aplicada: você perdeu metade dos seus créditos próprios.\n` +
-                `Créditos anteriores: ${before}\n` +
-                `Créditos restantes: ${after}\n\n` +
-                `O professor foi notificado.`
-            );
-
-            updateTeacherDashboard('status-infracao', `Tentou Colar (${reason})`);
-        }
-
         /* =========================================
            SISTEMA DE SEGURANÇA AGRESSIVO (ANTI-COLA)
            Mapeamento de Tela Cheia e Redimensionamento
            ========================================= */
-
+        
         // Inicia a prova travando a tela
         function startExam() {
             const docElm = document.documentElement;
@@ -486,35 +509,55 @@
                     examStarted = true;
                     updateTeacherDashboard('status-focado', 'Focado (Tela Cheia)');
                 }).catch(err => {
-                    alert("Seu navegador bloqueou a tela cheia. Permita para realizar a prova.");
+                    showModal('Tela cheia bloqueada', 'Seu navegador bloqueou a tela cheia. Permita para realizar a prova.', 'warning');
                 });
             }
         }
 
         // Detecta se o aluno apertou ESC ou tentou sair da tela cheia
         document.addEventListener('fullscreenchange', () => {
-            if (examStarted && !document.fullscreenElement) {
-                applyCheatPenalty("Saiu da Tela Cheia");
+            if (examStarted && !document.fullscreenElement && !hasCheated) {
+                triggerAntiCheat("Saiu da Tela Cheia");
             }
         });
 
-        // Detecta se o aluno tentou diminuir ou arrastar a janela
+        // Detecta se o aluno tentou diminuir ou arrastar a janela (quebra de padrão de pixels)
         window.addEventListener('resize', () => {
-            if (examStarted && !document.fullscreenElement) {
-                applyCheatPenalty("Janela redimensionada/arrastada");
+            if (examStarted && !document.fullscreenElement && !hasCheated) {
+                triggerAntiCheat("Quebra de Padrão (Janela Redimensionada/Arrastada)");
             }
         });
 
         // Detecta se mudou de aba (Visibility API original)
         document.addEventListener('visibilitychange', () => {
-            if (examStarted && document.hidden) {
-                applyCheatPenalty("Mudou de Aba");
+            if (examStarted && document.hidden && !hasCheated) {
+                triggerAntiCheat("Mudou de Aba");
             }
         });
+
+        // Função de Punição
+        function triggerAntiCheat(reason) {
+            hasCheated = true;
+            const penalty = Math.floor(currentCoins / 2);
+            currentCoins = Math.max(0, currentCoins - penalty);
+            document.getElementById('coin-amount').innerText = currentCoins;
+            document.getElementById('coin-amount').style.color = 'var(--danger-color)';
+
+            showModal('⚠️ Alerta de infração ⚠️', `Motivo: ${reason}\nDetectamos uma violação de segurança. A penalidade aplicada foi de ${penalty} crédito(s), com base em metade do saldo atual.\nSeus créditos foram reduzidos e o professor foi notificado.`, 'danger');
+
+            updateTeacherDashboard('status-infracao', `Tentou Colar (${reason})`);
+        }
 
         /* =========================================
            UTILITÁRIOS E FUNÇÕES ANTERIORES
            ========================================= */
+        function updateTeacherDashboard(statusClass, statusText) {
+            const dashIndicator = document.getElementById('dashboard-current-student');
+            const dashText = document.getElementById('dashboard-status-text');
+            dashIndicator.className = `status-indicator ${statusClass}`;
+            dashText.innerText = statusText;
+        }
+
         function selectOption(clickedElement) {
             const parentOptions = clickedElement.parentElement;
             const allOptions = parentOptions.querySelectorAll('.option');
@@ -525,14 +568,13 @@
         function nextQuestion(currentQuestionId) {
             const currentBlock = document.getElementById(`question-${currentQuestionId}`);
             const selectedOption = currentBlock.querySelector('.option.selected');
-            if (!selectedOption) { alert("Selecione uma alternativa!"); return; }
+            if (!selectedOption) { showModal('Atenção', 'Selecione uma alternativa!', 'warning'); return; }
             const nextBlock = document.getElementById(`question-${currentQuestionId + 1}`);
             if (nextBlock) {
                 currentBlock.classList.remove('active');
                 nextBlock.classList.add('active');
             } else {
-                alert("Prova Finalizada!");
-                updateTeacherDashboard('status-focado', 'Prova Finalizada');
+                showModal('Prova Finalizada', 'A prova foi concluída com sucesso!', 'success');
             }
         }
 
@@ -551,14 +593,14 @@
         }
 
         function buyHint() {
-            if (hasCheated) { alert("Você perdeu o acesso à compra de dicas devido a uma infração."); return; }
-
-            if (currentCoins >= CONFIG.HINT_COST) {
-                updatePoints(-CONFIG.HINT_COST, 'Compra de dica');
+            if (hasCheated) { showModal('Créditos bloqueados', 'Você perdeu seus créditos devido a uma infração.', 'danger'); return; }
+            if (currentCoins >= HINT_COST) {
+                currentCoins -= HINT_COST;
+                document.getElementById('coin-amount').innerText = currentCoins;
                 document.getElementById('hint-display').style.display = 'block';
                 updateTeacherDashboard('status-dica', 'Comprou Dica');
             } else {
-                alert("Saldo insuficiente!");
+                showModal('Saldo insuficiente', 'Saldo insuficiente!', 'warning');
             }
         }
 
@@ -567,7 +609,9 @@
         setInterval(() => {
             if (examStarted && timeInSeconds > 0) {
                 timeInSeconds--;
-                document.getElementById('timer').innerText = formatTime();
+                const minutes = Math.floor(timeInSeconds / 60);
+                const seconds = timeInSeconds % 60;
+                document.getElementById('timer').innerText = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
             }
         }, 1000);
 
@@ -583,7 +627,21 @@
 
         // Exportação Word
         function exportarParaWord() {
-            const htmlCompleto = "<html xmlns:w='urn:schemas-microsoft-com:office:word'><body>" + document.getElementById('relatorio-turma').innerHTML + "</body></html>";
+            const htmlCompleto = "<html xmlns:w='urn:schemas-microsoft-com:office:word'><body>" + document.getElementById('relatorio-turma').innerHTML + "
+    <div id="site-modal-backdrop" class="site-modal-backdrop" aria-hidden="true">
+        <div class="site-modal" role="dialog" aria-modal="true" aria-labelledby="site-modal-title">
+            <div class="site-modal-header">
+                <div id="site-modal-title" class="site-modal-title">Mensagem</div>
+                <button type="button" class="site-modal-close" onclick="hideModal()" aria-label="Fechar">×</button>
+            </div>
+            <div id="site-modal-body" class="site-modal-body"></div>
+            <div class="site-modal-footer">
+                <button type="button" class="btn-primary" style="width:auto;margin-top:0;" onclick="hideModal()">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+</body></html>";
             const blob = new Blob(['\ufeff', htmlCompleto], { type: 'application/msword' });
             const linkDownload = document.createElement("a");
             linkDownload.href = URL.createObjectURL(blob);
@@ -593,9 +651,20 @@
             document.body.removeChild(linkDownload);
         }
 
-        // Inicialização visual do saldo
-        updateCoinDisplay();
-
     </script>
+
+    <div id="site-modal-backdrop" class="site-modal-backdrop" aria-hidden="true">
+        <div class="site-modal" role="dialog" aria-modal="true" aria-labelledby="site-modal-title">
+            <div class="site-modal-header">
+                <div id="site-modal-title" class="site-modal-title">Mensagem</div>
+                <button type="button" class="site-modal-close" onclick="hideModal()" aria-label="Fechar">×</button>
+            </div>
+            <div id="site-modal-body" class="site-modal-body"></div>
+            <div class="site-modal-footer">
+                <button type="button" class="btn-primary" style="width:auto;margin-top:0;" onclick="hideModal()">Fechar</button>
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>
