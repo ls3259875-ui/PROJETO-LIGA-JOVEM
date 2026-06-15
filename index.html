@@ -253,10 +253,10 @@
             <div class="student-header">
                 <div class="hud-stats">
                     <div class="hud-item" title="Tempo Restante">
-                        ⏳ <span id="timer">1:00</span>
+                        ⏳ <span id="timer">15:00</span>
                     </div>
                     <div class="hud-item" title="Seu Saldo">
-                        💎 <span class="coin-balance"><span id="coin-amount">100</span> <span id="currency-name">Cripto-Créditos</span></span>
+                        💎 <span class="coin-balance"><span id="coin-amount">999</span> <span id="currency-name">Cripto-Créditos</span></span>
                     </div>
                 </div>
                 <button class="btn-secondary btn-theme" onclick="toggleTheme()">Alternar Tema Visual</button>
@@ -372,7 +372,7 @@
            ESTADO DA APLICAÇÃO E BÁSICOS
            ========================================= */
         const CONFIG = {
-            INITIAL_COINS: 100,
+            INITIAL_COINS: 15,
             HINT_COST: 5,
             MIN_COINS: 0
         };
@@ -563,7 +563,7 @@
         }
 
         // Cronômetro
-        let timeInSeconds = 90 * 60;
+        let timeInSeconds = 1 * 60;
         setInterval(() => {
             if (examStarted && timeInSeconds > 0) {
                 timeInSeconds--;
@@ -594,7 +594,7 @@
         }
 
         // Inicialização visual do saldo
-        updateCoinDisplay(200);
+        updateCoinDisplay(999);
 
     </script>
 </body>
