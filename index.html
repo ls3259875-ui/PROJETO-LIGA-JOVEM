@@ -367,14 +367,21 @@
     </main>
 
     <script>
+
         /* =========================================
            ESTADO DA APLICAÇÃO E BÁSICOS
            ========================================= */
-        let currentCoins = 15;
-        const HINT_COST = 5;
+        const CONFIG = {
+            INITIAL_COINS: 15,
+            HINT_COST: 5,
+            MIN_COINS: 0
+        };
+
+        let currentCoins = CONFIG.INITIAL_COINS;
         let currentTheme = 'futuristic';
         let hasCheated = false;
         let examStarted = false;
+        const pointHistory = [];
 
         function switchTab(tabId) {
             document.querySelectorAll('.nav-tabs button').forEach(btn => btn.classList.remove('active'));
@@ -384,11 +391,91 @@
             document.getElementById(`view-${tabId}`).classList.add('active');
         }
 
+        function formatTime() {
+            const minutes = Math.floor(timeInSeconds / 60);
+            const seconds = timeInSeconds % 60;
+            return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function addPointHistory(type, amount, reason) {
+            pointHistory.unshift({
+                type,
+                amount,
+                reason,
+                time: new Date().toLocaleTimeString()
+            });
+
+            if (pointHistory.length > 20) {
+                pointHistory.pop();
+            }
+
+            console.log(`[PONTOS] ${type}: ${amount} | ${reason}`);
+        }
+
+        function updateCoinDisplay() {
+            const coinAmount = document.getElementById('coin-amount');
+            const coinValue = Math.max(currentCoins, CONFIG.MIN_COINS);
+            coinAmount.innerText = coinValue;
+
+            if (hasCheated) {
+                coinAmount.style.color = 'var(--danger-color)';
+            } else if (coinValue === 0) {
+                coinAmount.style.color = 'var(--warning-color)';
+            } else {
+                coinAmount.style.color = '';
+            }
+        }
+
+        function updateTeacherDashboard(statusClass, statusText) {
+            const dashIndicator = document.getElementById('dashboard-current-student');
+            const dashText = document.getElementById('dashboard-status-text');
+            dashIndicator.className = `status-indicator ${statusClass}`;
+            dashText.innerText = statusText;
+        }
+
+        function updatePoints(delta, reason) {
+            const nextValue = Math.max(currentCoins + delta, CONFIG.MIN_COINS);
+            const appliedDelta = nextValue - currentCoins;
+            currentCoins = nextValue;
+            updateCoinDisplay();
+            addPointHistory(appliedDelta >= 0 ? 'ganho' : 'perda', appliedDelta, reason);
+            return currentCoins;
+        }
+
+        function setPoints(value, reason) {
+            currentCoins = Math.max(value, CONFIG.MIN_COINS);
+            updateCoinDisplay();
+            addPointHistory('ajuste', currentCoins, reason);
+        }
+
+        function applyCheatPenalty(reason) {
+            if (hasCheated) return;
+
+            const before = currentCoins;
+            const after = Math.floor(before / 2); // 20->10, 15->7, 1->0
+            currentCoins = after;
+            hasCheated = true;
+
+            updateCoinDisplay();
+            addPointHistory('penalidade', before - after, `Tentativa de cola: ${reason}`);
+
+            alert(
+                `⚠️ ALERTA DE INFRAÇÃO ⚠️\n` +
+                `Motivo: ${reason}\n` +
+                `Penalidade aplicada: você perdeu metade dos seus créditos próprios.\n` +
+                `Créditos anteriores: ${before}\n` +
+                `Créditos restantes: ${after}\n\n` +
+                `O professor foi notificado.`
+            );
+
+            updateTeacherDashboard('status-infracao', `Tentou Colar (${reason})`);
+        }
+
         /* =========================================
            SISTEMA DE SEGURANÇA AGRESSIVO (ANTI-COLA)
            Mapeamento de Tela Cheia e Redimensionamento
            ========================================= */
-        
+
         // Inicia a prova travando a tela
         function startExam() {
             const docElm = document.documentElement;
@@ -406,47 +493,28 @@
 
         // Detecta se o aluno apertou ESC ou tentou sair da tela cheia
         document.addEventListener('fullscreenchange', () => {
-            if (examStarted && !document.fullscreenElement && !hasCheated) {
-                triggerAntiCheat("Saiu da Tela Cheia");
+            if (examStarted && !document.fullscreenElement) {
+                applyCheatPenalty("Saiu da Tela Cheia");
             }
         });
 
-        // Detecta se o aluno tentou diminuir ou arrastar a janela (quebra de padrão de pixels)
+        // Detecta se o aluno tentou diminuir ou arrastar a janela
         window.addEventListener('resize', () => {
-            if (examStarted && !document.fullscreenElement && !hasCheated) {
-                triggerAntiCheat("Quebra de Padrão (Janela Redimensionada/Arrastada)");
+            if (examStarted && !document.fullscreenElement) {
+                applyCheatPenalty("Janela redimensionada/arrastada");
             }
         });
 
         // Detecta se mudou de aba (Visibility API original)
         document.addEventListener('visibilitychange', () => {
-            if (examStarted && document.hidden && !hasCheated) {
-                triggerAntiCheat("Mudou de Aba");
+            if (examStarted && document.hidden) {
+                applyCheatPenalty("Mudou de Aba");
             }
         });
-
-        // Função de Punição
-        function triggerAntiCheat(reason) {
-            hasCheated = true;
-            currentCoins = 0;
-            document.getElementById('coin-amount').innerText = currentCoins;
-            document.getElementById('coin-amount').style.color = 'var(--danger-color)';
-            
-            alert(`⚠️ ALERTA DE INFRAÇÃO ⚠️\nMotivo: ${reason}\nDetectamos uma violação de segurança. O padrão da sua tela foi alterado ou você tentou sair da área de prova.\nSeus créditos foram zerados e o professor foi notificado.`);
-            
-            updateTeacherDashboard('status-infracao', `Tentou Colar (${reason})`);
-        }
 
         /* =========================================
            UTILITÁRIOS E FUNÇÕES ANTERIORES
            ========================================= */
-        function updateTeacherDashboard(statusClass, statusText) {
-            const dashIndicator = document.getElementById('dashboard-current-student');
-            const dashText = document.getElementById('dashboard-status-text');
-            dashIndicator.className = `status-indicator ${statusClass}`;
-            dashText.innerText = statusText;
-        }
-
         function selectOption(clickedElement) {
             const parentOptions = clickedElement.parentElement;
             const allOptions = parentOptions.querySelectorAll('.option');
@@ -464,6 +532,7 @@
                 nextBlock.classList.add('active');
             } else {
                 alert("Prova Finalizada!");
+                updateTeacherDashboard('status-focado', 'Prova Finalizada');
             }
         }
 
@@ -482,10 +551,10 @@
         }
 
         function buyHint() {
-            if (hasCheated) { alert("Você perdeu seus créditos devido a uma infração."); return; }
-            if (currentCoins >= HINT_COST) {
-                currentCoins -= HINT_COST;
-                document.getElementById('coin-amount').innerText = currentCoins;
+            if (hasCheated) { alert("Você perdeu o acesso à compra de dicas devido a uma infração."); return; }
+
+            if (currentCoins >= CONFIG.HINT_COST) {
+                updatePoints(-CONFIG.HINT_COST, 'Compra de dica');
                 document.getElementById('hint-display').style.display = 'block';
                 updateTeacherDashboard('status-dica', 'Comprou Dica');
             } else {
@@ -498,9 +567,7 @@
         setInterval(() => {
             if (examStarted && timeInSeconds > 0) {
                 timeInSeconds--;
-                const minutes = Math.floor(timeInSeconds / 60);
-                const seconds = timeInSeconds % 60;
-                document.getElementById('timer').innerText = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                document.getElementById('timer').innerText = formatTime();
             }
         }, 1000);
 
@@ -525,6 +592,9 @@
             linkDownload.click();
             document.body.removeChild(linkDownload);
         }
+
+        // Inicialização visual do saldo
+        updateCoinDisplay();
 
     </script>
 </body>
