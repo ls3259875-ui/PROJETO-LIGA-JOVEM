@@ -372,7 +372,7 @@
            ESTADO DA APLICAÇÃO E BÁSICOS
            ========================================= */
         const CONFIG = {
-            INITIAL_COINS: 15,
+            INITIAL_COINS: 999,
             HINT_COST: 5,
             MIN_COINS: 0
         };
@@ -563,7 +563,7 @@
         }
 
         // Cronômetro
-        let timeInSeconds = 1 * 60;
+        let timeInSeconds = 15 * 60;
         setInterval(() => {
             if (examStarted && timeInSeconds > 0) {
                 timeInSeconds--;
@@ -594,7 +594,7 @@
         }
 
         // Inicialização visual do saldo
-        updateCoinDisplay(999);
+        updateCoinDisplay();
 
     </script>
 </body>
