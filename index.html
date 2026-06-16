@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Liga Jovem 2026 - Avaliação Gamificada Segura</title>
-    <link href="https://fonts.googleapis.com/css2=family=Inter:wght@400;600&family=Orbitron:wght@500;700&family=Lora:ital,wght@0,400;0,600&family=Cinzel:wght@600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Orbitron:wght@500;700&family=Lora:ital,wght@0,400;0,600&family=Cinzel:wght@600&display=swap" rel="stylesheet">
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
@@ -58,3 +58,605 @@
             background-color: var(--bg-color);
             color: var(--text-primary);
             font-family: var(--font-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        h1, h2, h3, .display-font {
+            font-family: var(--font-display);
+            letter-spacing: 1px;
+        }
+
+        button {
+            cursor: pointer;
+            border: none;
+            outline: none;
+            font-family: var(--font-display);
+            font-weight: 600;
+            border-radius: var(--border-radius);
+            transition: var(--transition);
+        }
+
+        .btn-primary {
+            background-color: var(--accent-color);
+            color: var(--bg-color);
+            padding: 12px 24px;
+            font-size: 1rem;
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.3);
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--accent-hover);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--accent-color);
+            border: 1px solid var(--accent-color);
+            padding: 8px 16px;
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .btn-theme { width: auto; margin-top: 0; }
+
+        header {
+            background-color: var(--surface-color);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: var(--card-border);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 10;
+        }
+
+        .logo { font-size: 1.5rem; color: var(--accent-color); }
+
+        .nav-tabs button {
+            background: transparent;
+            color: var(--text-secondary);
+            font-size: 1rem;
+            padding: 10px 20px;
+            margin-left: 10px;
+            width: auto;
+            margin-top: 0;
+        }
+
+        .nav-tabs button.active {
+            color: var(--accent-color);
+            border-bottom: 2px solid var(--accent-color);
+            border-radius: 0;
+        }
+
+        main {
+            flex: 1;
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            position: relative;
+        }
+
+        .view-section { display: none; animation: fadeIn 0.5s ease; }
+        .view-section.active { display: block; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            background-color: var(--surface-color);
+            border-radius: var(--border-radius);
+            border: var(--card-border);
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+
+        /* =========================================
+           2. SISTEMA DE BLOQUEIO DE PROVA (FIXED OVERLAY)
+           ========================================= */
+        #exam-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(11, 15, 25, 0.98);
+            backdrop-filter: blur(15px);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        [data-theme="classic"] #exam-overlay {
+            background-color: rgba(244, 236, 216, 0.98);
+        }
+
+        #exam-overlay h2 { color: var(--accent-color); margin-bottom: 1rem; font-size: 2rem;}
+        #exam-overlay p { color: var(--text-primary); margin-bottom: 2rem; max-width: 600px; line-height: 1.5; }
+
+        /* =========================================
+           3. RESTANTE DOS ESTILOS
+           ========================================= */
+        .student-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+        .hud-stats { display: flex; gap: 2rem; font-size: 1.2rem; font-family: var(--font-display); }
+        .hud-item { display: flex; align-items: center; gap: 0.5rem; }
+        .coin-balance { color: var(--warning-color); font-weight: bold; }
+        .question-block { display: none; }
+        .question-block.active { display: block; animation: fadeIn 0.4s ease; }
+        .question-area h2 { margin-bottom: 1.5rem; font-size: 1.5rem; line-height: 1.4; }
+        .options { display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2rem; }
+        .option { padding: 1rem; border: 1px solid var(--text-secondary); border-radius: var(--border-radius); cursor: pointer; transition: var(--transition); color: var(--text-primary); }
+        .option:hover { border-color: var(--accent-color); background: rgba(255, 255, 255, 0.02); }
+        .option.selected { background-color: rgba(0, 255, 204, 0.1); border-color: var(--accent-color); box-shadow: 0 0 10px rgba(0, 255, 204, 0.2); color: var(--accent-color); font-weight: bold; }
+        [data-theme="classic"] .option.selected { background-color: rgba(184, 134, 11, 0.1); box-shadow: 0 0 10px rgba(184, 134, 11, 0.2); color: var(--accent-color); }
+        
+        .shop-area { display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.2); padding: 1.5rem; border-radius: var(--border-radius); border-left: 4px solid var(--accent-color); }
+        .shop-area button { width: auto; margin-top: 0; }
+        #hint-display { margin-top: 1rem; padding: 1rem; background-color: rgba(255, 204, 0, 0.1); border-left: 4px solid var(--warning-color); color: var(--warning-color); display: none; border-radius: 4px; }
+        
+        .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+        @media (max-width: 768px) { .dashboard-grid { grid-template-columns: 1fr; } }
+        .form-group { margin-bottom: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem; }
+        input[type="text"], input[type="number"], textarea, input[type="file"], select { background-color: rgba(0,0,0,0.2); border: 1px solid var(--text-secondary); color: var(--text-primary); padding: 10px; border-radius: 4px; font-family: var(--font-main); width: 100%; }
+        input:focus, textarea:focus, select:focus { outline: none; border-color: var(--accent-color); }
+        input[type="file"]::file-selector-button { background-color: var(--surface-color); color: var(--text-primary); border: 1px solid var(--text-secondary); padding: 8px 12px; border-radius: 4px; cursor: pointer; margin-right: 10px; transition: var(--transition); }
+        input[type="file"]::file-selector-button:hover { border-color: var(--accent-color); color: var(--accent-color); }
+        
+        .student-list { list-style: none; }
+        .student-row { display: flex; justify-content: space-between; align-items: center; padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .student-name { color: var(--text-primary); font-weight: 500; }
+        .status-indicator { display: flex; align-items: center; gap: 8px; font-weight: 600; font-family: var(--font-display); }
+        .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+        .status-focado .dot { background-color: var(--success-color); box-shadow: 0 0 8px var(--success-color); }
+        .status-focado span { color: var(--success-color); }
+        .status-dica .dot { background-color: var(--warning-color); box-shadow: 0 0 8px var(--warning-color); }
+        .status-dica span { color: var(--warning-color); }
+        .status-infracao .dot { background-color: var(--danger-color); box-shadow: 0 0 8px var(--danger-color); }
+        .status-infracao span { color: var(--danger-color); }
+        .export-actions { display: flex; gap: 1rem; }
+    </style>
+</head>
+<body>
+
+    <div id="exam-overlay">
+        <h2>Atenção: Modo Seguro Requerido</h2>
+        <p>Para garantir a integridade desta avaliação, a prova só pode ser realizada em <strong>Tela Cheia Absoluta</strong>. O sistema está mapeando o padrão da sua tela. Qualquer tentativa de sair da tela cheia, redimensionar ou arrastar o navegador será detectada como quebra de padrão e infração.</p>
+        <button class="btn-primary" style="width: 300px;" onclick="startExam()">Iniciar Avaliação em Tela Cheia</button>
+    </div>
+
+    <header>
+        <div class="logo display-font">LIGA JOVEM / AVALIAÇÃO</div>
+        <div class="nav-tabs">
+            <button class="active" onclick="switchTab('aluno', this)">Visão do Aluno</button>
+            <button onclick="switchTab('professor', this)">Radar do Professor</button>
+        </div>
+    </header>
+
+    <main>
+        <section id="view-aluno" class="view-section active">
+            
+            <div class="student-header">
+                <div class="hud-stats">
+                    <div class="hud-item" title="Tempo Restante">
+                        ⏳ <span id="timer">15:00</span>
+                    </div>
+                    <div class="hud-item" title="Seu Saldo">
+                        💎 <span class="coin-balance"><span id="coin-amount">15</span> <span id="currency-name">Cripto-Créditos</span></span>
+                    </div>
+                </div>
+                <button class="btn-secondary btn-theme" onclick="toggleTheme()">Alternar Tema Visual</button>
+            </div>
+
+            <div class="card question-area">
+                <div class="question-block active" id="question-1">
+                    <h2>Questão 1: Em uma aplicação web, qual evento JavaScript é disparado quando o usuário muda de aba ou minimiza o navegador, permitindo a criação de sistemas anti-cola?</h2>
+                    <div class="options">
+                        <div class="option" onclick="selectOption(this)">A) window.onblur</div>
+                        <div class="option" onclick="selectOption(this)">B) document.visibilitychange</div>
+                        <div class="option" onclick="selectOption(this)">C) screen.onleave</div>
+                        <div class="option" onclick="selectOption(this)">D) navigator.away</div>
+                    </div>
+                    <button class="btn-primary" onclick="nextQuestion(1)">Confirmar e Avançar</button>
+                </div>
+
+                <div class="question-block" id="question-2">
+                    <h2>Questão 2: Qual a principal finalidade da tag HTML <code>&lt;canvas&gt;</code>?</h2>
+                    <div class="options">
+                        <div class="option" onclick="selectOption(this)">A) Reproduzir áudio e vídeo de forma nativa.</div>
+                        <div class="option" onclick="selectOption(this)">B) Renderizar gráficos 2D e 3D dinamicamente via JavaScript.</div>
+                        <div class="option" onclick="selectOption(this)">C) Criar tabelas responsivas automaticamente.</div>
+                        <div class="option" onclick="selectOption(this)">D) Estilizar elementos usando variáveis CSS.</div>
+                    </div>
+                    <button class="btn-primary" onclick="nextQuestion(2)">Confirmar e Avançar</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="shop-area">
+                    <div>
+                        <h3 class="display-font">Lojinha de Ajuda</h3>
+                        <p style="margin-top: 5px; font-size: 0.9rem; color: var(--text-secondary);">Está em dúvida? Use seus créditos para comprar uma dica.</p>
+                    </div>
+                    <button class="btn-primary" onclick="buyHint()">Comprar Dica (-5 Créditos)</button>
+                </div>
+                <div id="hint-display">
+                    <strong>Dica do Professor:</strong> Leia com atenção o enunciado e elimine as respostas que não fazem sentido com a tecnologia abordada.
+                </div>
+            </div>
+        </section>
+
+        <section id="view-professor" class="view-section">
+            <div class="dashboard-grid">
+                
+                <div>
+                    <div class="card" id="relatorio-turma">
+                        <h2 style="margin-bottom: 1.5rem;">Radar da Turma em Tempo Real</h2>
+                        <ul class="student-list" id="student-list">
+                            <li class="student-row">
+                                <span class="student-name">Maria S.</span>
+                                <div class="status-indicator status-focado">
+                                    <div class="dot"></div><span>Focado</span>
+                                </div>
+                            </li>
+                            <li class="student-row">
+                                <span class="student-name">João P.</span>
+                                <div class="status-indicator status-dica">
+                                    <div class="dot"></div><span>Comprou Dica</span>
+                                </div>
+                            </li>
+                            <li class="student-row" style="background: rgba(0, 255, 204, 0.05); border: 1px solid var(--accent-color);">
+                                <strong class="student-name">Aluno Atual (Visão Simulada)</strong>
+                                <div class="status-indicator status-focado" id="dashboard-current-student">
+                                    <div class="dot"></div><span id="dashboard-status-text">Aguardando Início</span>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="card">
+                        <h2 style="margin-bottom: 1.5rem;">Exportar Relatório</h2>
+                        <p style="margin-bottom: 1rem; color: var(--text-secondary);">Exporte a situação atual da turma nos formatos suportados.</p>
+                        <div class="export-actions">
+                            <button class="btn-primary" style="margin-top:0;" onclick="exportarParaPDF()">Baixar PDF</button>
+                            <button class="btn-secondary" style="margin-top:0;" onclick="exportarParaWord()">Baixar Word</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="card">
+                        <h2 style="margin-bottom: 1.5rem;">Importar Prova Completa</h2>
+                        <p style="margin-bottom: 1rem; color: var(--text-secondary); font-size: 0.9rem;">
+                            Faça o upload do arquivo contendo as questões. O sistema irá processar e recortar os blocos de perguntas e alternativas estruturadas, omitindo o gabarito real da visão do estudante.
+                        </p>
+                        <form id="formImportacao" onsubmit="processarImportacaoProva(event)">
+                            <div class="form-group">
+                                <label style="margin-bottom: 0.5rem; display: block;">Selecione o arquivo da avaliação (.PDF, .DOC, .DOCX):</label>
+                                <input type="file" id="importadorProva" accept=".pdf, .doc, .docx, application/pdf, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document" required>
+                            </div>
+                            <div class="form-group">
+                                <label style="margin-bottom: 0.5rem; display: block;">Vincular à Turma Ativa:</label>
+                                <select>
+                                    <option value="t1">Turma 01 - Análise de Sistemas e Mercado</option>
+                                    <option value="t2">Turma 02 - Estrutura de Dados Relacionais (LGPD)</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn-primary">Processar Arquivo e Gerar Prova</button>
+                        </form>
+                    </div>
+
+                    <div class="card">
+                        <h2 style="margin-bottom: 1.5rem;">Configuração Manual Rápida</h2>
+                        <form onsubmit="event.preventDefault(); alert('Banco de dados local atualizado!');">
+                            <div class="form-group">
+                                <label>Enunciado da Questão Manual</label>
+                                <textarea rows="3">Insira aqui uma questão extra caso necessário...</textarea>
+                            </div>
+                            <button type="submit" class="btn-primary">Atualizar Questão Isolada</button>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+    </main>
+
+    <script>
+        /* =========================================
+           ESTADO DA APLICAÇÃO E VARIÁVEIS GLOBAIS
+           ========================================= */
+        const CONFIG = {
+            INITIAL_COINS: 15,
+            HINT_COST: 5,
+            MIN_COINS: 0
+        };
+
+        let currentCoins = CONFIG.INITIAL_COINS;
+        let currentTheme = 'futuristic';
+        let hasCheated = false;
+        let examStarted = false;
+        let timeInSeconds = 15 * 60;
+        const pointHistory = [];
+
+        /* NAVEGAÇÃO ENTRE INTERFACES (TABS) */
+        function switchTab(tabId, buttonElement) {
+            document.querySelectorAll('.nav-tabs button').forEach(btn => btn.classList.remove('active'));
+            buttonElement.classList.add('active');
+
+            document.querySelectorAll('.view-section').forEach(view => view.classList.remove('active'));
+            document.getElementById(`view-${tabId}`).classList.add('active');
+        }
+
+        /* FORMATADOR DO CRONÔMETRO */
+        function formatTime() {
+            const minutes = Math.floor(timeInSeconds / 60);
+            const seconds = timeInSeconds % 60;
+            return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function addPointHistory(type, amount, reason) {
+            pointHistory.unshift({
+                type, amount, reason,
+                time: new Date().toLocaleTimeString()
+            });
+            console.log(`[PONTOS] ${type.toUpperCase()}: ${amount} | ${reason}`);
+        }
+
+        function updateCoinDisplay() {
+            const coinAmount = document.getElementById('coin-amount');
+            if (!coinAmount) return;
+            
+            const coinValue = Math.max(currentCoins, CONFIG.MIN_COINS);
+            coinAmount.innerText = coinValue;
+
+            if (hasCheated) {
+                coinAmount.style.color = 'var(--danger-color)';
+            } else if (coinValue === 0) {
+                coinAmount.style.color = 'var(--warning-color)';
+            } else {
+                coinAmount.style.color = '';
+            }
+        }
+
+        function updateTeacherDashboard(statusClass, statusText) {
+            const dashIndicator = document.getElementById('dashboard-current-student');
+            const dashText = document.getElementById('dashboard-status-text');
+            if (dashIndicator && dashText) {
+                dashIndicator.className = `status-indicator ${statusClass}`;
+                dashText.innerText = statusText;
+            }
+        }
+
+        function updatePoints(delta, reason) {
+            const nextValue = Math.max(currentCoins + delta, CONFIG.MIN_COINS);
+            const appliedDelta = nextValue - currentCoins;
+            currentCoins = nextValue;
+            updateCoinDisplay();
+            addPointHistory(appliedDelta >= 0 ? 'ganho' : 'perda', appliedDelta, reason);
+            return currentCoins;
+        }
+
+        /* SISTEMA SEGURO (ANTI-COLA AGRESSIVO) */
+        function applyCheatPenalty(reason) {
+            if (hasCheated) return;
+
+            const before = currentCoins;
+            const after = Math.floor(before / 2);
+            currentCoins = after;
+            hasCheated = true;
+
+            updateCoinDisplay();
+            addPointHistory('penalidade', before - after, `Tentativa de cola: ${reason}`);
+
+            alert(
+                `⚠️ ALERTA DE INFRAÇÃO DETECTADA ⚠️\n` +
+                `Motivo: ${reason}\n` +
+                `Penalidade: Metade de seus créditos foram retidos instantaneamente.\n` +
+                `Créditos Anteriores: ${before} | Saldo Atual: ${after}\n\n` +
+                `O painel do monitoramento do professor registrou esta ação.`
+            );
+
+            updateTeacherDashboard('status-infracao', `Tentou Colar (${reason})`);
+        }
+
+        function startExam() {
+            const docElm = document.documentElement;
+            if (docElm.requestFullscreen) {
+                docElm.requestFullscreen().then(() => {
+                    document.getElementById('exam-overlay').style.display = 'none';
+                    examStarted = true;
+                    updateTeacherDashboard('status-focado', 'Focado (Tela Cheia)');
+                }).catch(err => {
+                    alert("Para iniciar a prova, conceda a permissão de Tela Cheia no navegador.");
+                });
+            } else {
+                document.getElementById('exam-overlay').style.display = 'none';
+                examStarted = true;
+            }
+        }
+
+        /* MONITORES DE EVENTOS DE QUEBRA DE PADRÃO */
+        document.addEventListener('fullscreenchange', () => {
+            if (examStarted && !document.fullscreenElement) {
+                applyCheatPenalty("Saiu da Tela Cheia");
+            }
+        });
+
+        window.addEventListener('resize', () => {
+            if (examStarted && !document.fullscreenElement) {
+                applyCheatPenalty("Janela redimensionada/arrastada");
+            }
+        });
+
+        document.addEventListener('visibilitychange', () => {
+            if (examStarted && document.hidden) {
+                applyCheatPenalty("Mudou de Aba/Minimizou");
+            }
+        });
+
+        /* REGRAS DAS QUESTÕES */
+        function selectOption(clickedElement) {
+            const parentOptions = clickedElement.parentElement;
+            const allOptions = parentOptions.querySelectorAll('.option');
+            allOptions.forEach(option => option.classList.remove('selected'));
+            clickedElement.add('selected');
+            clickedElement.classList.add('selected');
+        }
+
+        function nextQuestion(currentQuestionId) {
+            const currentBlock = document.getElementById(`question-${currentQuestionId}`);
+            const selectedOption = currentBlock.querySelector('.option.selected');
+            
+            if (!selectedOption) { 
+                alert("Selecione uma alternativa antes de prosseguir!"); 
+                return; 
+            }
+            
+            const nextBlock = document.getElementById(`question-${currentQuestionId + 1}`);
+            if (nextBlock) {
+                currentBlock.classList.remove('active');
+                nextBlock.classList.add('active');
+            } else {
+                alert("Avaliação finalizada com sucesso! Suas respostas foram computadas com segurança.");
+                updateTeacherDashboard('status-focado', 'Prova Concluída');
+            }
+        }
+
+        /* CONTROLE DE ALTERNÂNCIA DE TEMA */
+        function toggleTheme() {
+            const body = document.body;
+            const currencyLabel = document.getElementById('currency-name');
+            if (currentTheme === 'futuristic') {
+                body.setAttribute('data-theme', 'classic');
+                if (currencyLabel) currencyLabel.innerText = "Moedas de Ouro";
+                currentTheme = 'classic';
+            } else {
+                body.removeAttribute('data-theme');
+                if (currencyLabel) currencyLabel.innerText = "Cripto-Créditos";
+                currentTheme = 'futuristic';
+            }
+        }
+
+        /* LOJINHA DE DICAS (GAMIFICAÇÃO) */
+        function buyHint() {
+            if (hasCheated) { 
+                alert("Bloqueado: Você perdeu o direito de comprar dicas por quebra das diretrizes de segurança."); 
+                return; 
+            }
+
+            if (currentCoins >= CONFIG.HINT_COST) {
+                updatePoints(-CONFIG.HINT_COST, 'Compra de dica');
+                document.getElementById('hint-display').style.display = 'block';
+                updateTeacherDashboard('status-dica', 'Comprou Dica');
+            } else {
+                alert("Saldo insuficiente! Resolva mais questões para adquirir moedas no seu cofrinho.");
+            }
+        }
+
+        /* PROCESSAMENTO LOCAL DE ARQUIVO IMPORTADO */
+        function processarImportacaoProva(event) {
+            event.preventDefault();
+            const fileInput = document.getElementById('importadorProva');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                alert("Erro: Arquivo não detectado.");
+                return;
+            }
+
+            alert(`Arquivo detectado com sucesso: ${file.name}\nQuebrando estruturas de texto e isolando gabarito relacional oculto...`);
+            simularInjecaoDeQuestaoImportada();
+            document.getElementById('formImportacao').reset();
+        }
+
+        function simularInjecaoDeQuestaoImportada() {
+            const totalQuestoes = document.querySelectorAll('.question-block').length;
+            const proximoID = totalQuestoes + 1;
+            
+            const estruturaQuestao = `
+                <div class="question-block" id="question-${proximoID}">
+                    <h2>Questão ${proximoID} (Importada via Documento): No contexto de modelagem relacional de dados integrada à LGPD, qual restrição de integridade impede a duplicidade de cadastros duplicados de alunos com o mesmo nome ou documento?</h2>
+                    <div class="options">
+                        <div class="option" onclick="selectOption(this)">A) Atributos multivalorados redundantes.</div>
+                        <div class="option" onclick="selectOption(this)">B) Definição de Chaves Primárias (PRIMARY KEY) e Constraints do tipo UNIQUE.</div>
+                        <div class="option" onclick="selectOption(this)">C) Implementação de scripts em CSS variables.</div>
+                        <div class="option" onclick="selectOption(this)">D) Clonagem automática de tabelas temporárias.</div>
+                    </div>
+                    <button class="btn-primary" onclick="nextQuestion(${proximoID})">Confirmar e Finalizar Avaliação</button>
+                </div>
+            `;
+
+            const areaQuestoes = document.querySelector('.question-area');
+            if (areaQuestoes) {
+                areaQuestoes.insertAdjacentHTML('beforeend', estruturaQuestao);
+                alert("Sucesso! O documento foi parseado e mapeado. Mude para a 'Visão do Aluno' para responder à nova questão inserida dinamicamente.");
+            }
+        }
+
+        /* RELATÓRIO DO RADAR DA SALA (EXPORTAÇÕES) */
+        function exportarParaPDF() {
+            const elemento = document.getElementById('relatorio-turma');
+            if (!elemento) return;
+            
+            const nomes = elemento.querySelectorAll('.student-name');
+            nomes.forEach(n => n.style.color = '#000000');
+            
+            html2pdf().set({ 
+                margin: 12, 
+                filename: 'Radar_Turma_LigaJovem2026.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            }).from(elemento).save().then(() => {
+                nomes.forEach(n => n.style.color = '');
+            });
+        }
+
+        function exportarParaWord() {
+            const container = document.getElementById('relatorio-turma');
+            if (!container) return;
+            
+            const htmlCompleto = `<html xmlns:w='urn:schemas-microsoft-com:office:word'>
+                <head><meta charset='utf-8'></head>
+                <body style='font-family:Arial, sans-serif;'>
+                    <h2>Relatório de Desempenho e Foco da Turma</h2>
+                    ${container.innerHTML}
+                </body>
+            </html>`;
+            
+            const blob = new Blob(['\ufeff', htmlCompleto], { type: 'application/msword' });
+            const linkDownload = document.createElement("a");
+            linkDownload.href = URL.createObjectURL(blob);
+            linkDownload.download = 'Relatorio_Radar_Turma.doc';
+            document.body.appendChild(linkDownload);
+            linkDownload.click();
+            document.body.removeChild(linkDownload);
+        }
+
+        /* EXECUÇÃO DE CRONÔMETRO ATIVO */
+        setInterval(() => {
+            if (examStarted && timeInSeconds > 0) {
+                timeInSeconds--;
+                document.getElementById('timer').innerText = formatTime();
+            }
+        }, 1000);
+
+        /* INICIALIZAÇÃO DE SALDO */
+        updateCoinDisplay();
+    </script>
+</body>
+</html>
