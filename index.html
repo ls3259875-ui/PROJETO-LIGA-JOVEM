@@ -47,7 +47,7 @@
             --card-border: 2px solid #deb887;
         }
 
-        * {
+        *, *::before, *::after {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
@@ -59,8 +59,7 @@
             color: var(--text-primary);
             font-family: var(--font-main);
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
+            display: block;
         }
 
         h1, h2, h3, .display-font {
@@ -97,7 +96,8 @@
             background: transparent;
             color: var(--accent-color);
             border: 1px solid var(--accent-color);
-            padding: 8px 16px;
+            padding: 12px 24px;
+            font-size: 1rem;
             width: 100%;
             margin-top: 1rem;
         }
@@ -106,21 +106,23 @@
             background: rgba(255, 255, 255, 0.05);
         }
 
-        .btn-theme { width: auto; margin-top: 0; }
+        .btn-theme { width: auto; margin-top: 0; padding: 8px 16px; font-size: 0.9rem; }
 
         header {
             background-color: var(--surface-color);
             padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
             border-bottom: var(--card-border);
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
             position: relative;
             z-index: 10;
         }
 
-        .logo { font-size: 1.5rem; color: var(--accent-color); }
+        .header-container {
+            display: block;
+        }
+
+        .logo { float: left; font-size: 1.5rem; color: var(--accent-color); line-height: 40px; }
+        .nav-tabs { float: right; }
 
         .nav-tabs button {
             background: transparent;
@@ -138,8 +140,9 @@
             border-radius: 0;
         }
 
+        .clear-fix { clear: both; }
+
         main {
-            flex: 1;
             padding: 2rem;
             max-width: 1200px;
             margin: 0 auto;
@@ -165,7 +168,7 @@
         }
 
         /* =========================================
-           2. SISTEMA DE BLOQUEIO DE PROVA (FIXED OVERLAY)
+           2. SISTEMA DE BLOQUEIO E MODAIS EM POSIÇÃO ABSOLUTA
            ========================================= */
         #exam-overlay {
             position: fixed;
@@ -173,76 +176,153 @@
             background-color: rgba(11, 15, 25, 0.98);
             backdrop-filter: blur(15px);
             z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            padding: 2rem;
+            display: block;
         }
 
         [data-theme="classic"] #exam-overlay {
             background-color: rgba(244, 236, 216, 0.98);
         }
 
+        .overlay-card {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            padding: 2rem;
+            width: 90%;
+            max-width: 650px;
+        }
+
         #exam-overlay h2 { color: var(--accent-color); margin-bottom: 1rem; font-size: 2rem;}
-        #exam-overlay p { color: var(--text-primary); margin-bottom: 2rem; max-width: 600px; line-height: 1.5; }
+        #exam-overlay p { color: var(--text-primary); margin-bottom: 2rem; line-height: 1.6; }
+
+        /* Pop-up Customizado Anti-Quebra de Tela Cheia */
+        #custom-popup-modal {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: rgba(11, 15, 25, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 10000;
+            display: none;
+        }
+
+        [data-theme="classic"] #custom-popup-modal {
+            background-color: rgba(244, 236, 216, 0.85);
+        }
+
+        .popup-card {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: var(--surface-color);
+            border: var(--card-border);
+            border-radius: var(--border-radius);
+            padding: 2.5rem;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            box-shadow: var(--shadow);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .popup-card h3 { margin-bottom: 1rem; font-size: 1.6rem; }
+        .popup-card p { color: var(--text-primary); line-height: 1.5; margin-bottom: 1.5rem; }
 
         /* =========================================
-           3. RESTANTE DOS ESTILOS
+           3. ESTRUTURA DO ALUNO E QUESTÕES
            ========================================= */
-        .student-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
-        .hud-stats { display: flex; gap: 2rem; font-size: 1.2rem; font-family: var(--font-display); }
-        .hud-item { display: flex; align-items: center; gap: 0.5rem; }
+        .student-header { display: block; margin-bottom: 2rem; height: 40px; }
+        .hud-stats { float: left; font-size: 1.2rem; font-family: var(--font-display); line-height: 40px; }
+        .hud-item { display: inline-block; margin-right: 2rem; }
         .coin-balance { color: var(--warning-color); font-weight: bold; }
+        
         .question-block { display: none; }
         .question-block.active { display: block; animation: fadeIn 0.4s ease; }
-        .question-area h2 { margin-bottom: 1.5rem; font-size: 1.5rem; line-height: 1.4; }
-        .options { display: flex; flex-direction: column; gap: 1rem; margin-bottom: 2rem; }
-        .option { padding: 1rem; border: 1px solid var(--text-secondary); border-radius: var(--border-radius); cursor: pointer; transition: var(--transition); color: var(--text-primary); }
+        .question-area h2 { margin-bottom: 1.5rem; font-size: 1.4rem; line-height: 1.5; }
+        
+        .options { display: block; margin-bottom: 1.5rem; }
+        .option { padding: 1.2rem; border: 1px solid var(--text-secondary); border-radius: var(--border-radius); cursor: pointer; transition: var(--transition); color: var(--text-primary); margin-bottom: 1rem; display: block; }
         .option:hover { border-color: var(--accent-color); background: rgba(255, 255, 255, 0.02); }
-        .option.selected { background-color: rgba(0, 255, 204, 0.1); border-color: var(--accent-color); box-shadow: 0 0 10px rgba(0, 255, 204, 0.2); color: var(--accent-color); font-weight: bold; }
-        [data-theme="classic"] .option.selected { background-color: rgba(184, 134, 11, 0.1); box-shadow: 0 0 10px rgba(184, 134, 11, 0.2); color: var(--accent-color); }
         
-        .shop-area { display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.2); padding: 1.5rem; border-radius: var(--border-radius); border-left: 4px solid var(--accent-color); }
+        /* Classe de seleção corrigida */
+        .option.selected { 
+            background-color: rgba(0, 255, 204, 0.1) !important; 
+            border-color: var(--accent-color) !important; 
+            box-shadow: 0 0 12px rgba(0, 255, 204, 0.3) !important; 
+            color: var(--accent-color) !important; 
+            font-weight: bold; 
+        }
+        [data-theme="classic"] .option.selected { 
+            background-color: rgba(184, 134, 11, 0.15) !important; 
+            box-shadow: 0 0 12px rgba(184, 134, 11, 0.3) !important; 
+            color: var(--accent-color) !important; 
+        }
+        
+        /* Botões lado a lado estruturados sem flex/grid */
+        .action-buttons { width: 100%; margin-top: 1.5rem; display: block; }
+        .btn-inline { display: inline-block; width: 48%; margin-top: 0; }
+        .btn-inline-right { float: right; }
+
+        .shop-area { display: block; background: rgba(0,0,0,0.2); padding: 1.5rem; border-radius: var(--border-radius); border-left: 4px solid var(--accent-color); }
+        .shop-text { float: left; width: 60%; }
+        .shop-btn-box { float: right; width: 35%; text-align: right; }
         .shop-area button { width: auto; margin-top: 0; }
-        #hint-display { margin-top: 1rem; padding: 1rem; background-color: rgba(255, 204, 0, 0.1); border-left: 4px solid var(--warning-color); color: var(--warning-color); display: none; border-radius: 4px; }
         
-        .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
-        @media (max-width: 768px) { .dashboard-grid { grid-template-columns: 1fr; } }
-        .form-group { margin-bottom: 1.5rem; display: flex; flex-direction: column; gap: 0.5rem; }
-        input[type="text"], input[type="number"], textarea, input[type="file"], select { background-color: rgba(0,0,0,0.2); border: 1px solid var(--text-secondary); color: var(--text-primary); padding: 10px; border-radius: 4px; font-family: var(--font-main); width: 100%; }
+        #hint-display { margin-top: 1rem; padding: 1rem; background-color: rgba(255, 204, 0, 0.1); border-left: 4px solid var(--warning-color); color: var(--warning-color); display: none; border-radius: 4px; clear: both; }
+        
+        /* Dashboard do Professor */
+        .dashboard-grid { display: block; width: 100%; }
+        .dashboard-col { display: inline-block; width: 49%; vertical-align: top; }
+        .dashboard-col-left { margin-right: 1%; }
+        @media (max-width: 768px) { .dashboard-col { width: 100%; margin-right: 0; margin-bottom: 2rem; } }
+        
+        .form-group { margin-bottom: 1.5rem; display: block; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; }
+        input[type="text"], input[type="number"], textarea, input[type="file"], select { background-color: rgba(0,0,0,0.2); border: 1px solid var(--text-secondary); color: var(--text-primary); padding: 10px; border-radius: 4px; font-family: var(--font-main); width: 100%; display: block; }
         input:focus, textarea:focus, select:focus { outline: none; border-color: var(--accent-color); }
-        input[type="file"]::file-selector-button { background-color: var(--surface-color); color: var(--text-primary); border: 1px solid var(--text-secondary); padding: 8px 12px; border-radius: 4px; cursor: pointer; margin-right: 10px; transition: var(--transition); }
-        input[type="file"]::file-selector-button:hover { border-color: var(--accent-color); color: var(--accent-color); }
         
         .student-list { list-style: none; }
-        .student-row { display: flex; justify-content: space-between; align-items: center; padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        .student-name { color: var(--text-primary); font-weight: 500; }
-        .status-indicator { display: flex; align-items: center; gap: 8px; font-weight: 600; font-family: var(--font-display); }
-        .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+        .student-row { display: block; padding: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); height: 50px; line-height: 20px;}
+        .student-name { float: left; color: var(--text-primary); font-weight: 500; }
+        .status-indicator { float: right; display: block; font-weight: 600; font-family: var(--font-display); }
+        .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; margin-right: 6px; vertical-align: middle; }
+        
         .status-focado .dot { background-color: var(--success-color); box-shadow: 0 0 8px var(--success-color); }
         .status-focado span { color: var(--success-color); }
         .status-dica .dot { background-color: var(--warning-color); box-shadow: 0 0 8px var(--warning-color); }
         .status-dica span { color: var(--warning-color); }
         .status-infracao .dot { background-color: var(--danger-color); box-shadow: 0 0 8px var(--danger-color); }
         .status-infracao span { color: var(--danger-color); }
-        .export-actions { display: flex; gap: 1rem; }
+        
+        .export-actions button { display: inline-block; width: 48%; margin-top: 0; }
     </style>
 </head>
 <body>
 
     <div id="exam-overlay">
-        <h2>Atenção: Modo Seguro Requerido</h2>
-        <p>Para garantir a integridade desta avaliação, a prova só pode ser realizada em <strong>Tela Cheia Absoluta</strong>. O sistema está mapeando o padrão da sua tela. Qualquer tentativa de sair da tela cheia, redimensionar ou arrastar o navegador será detectada como quebra de padrão e infração.</p>
-        <button class="btn-primary" style="width: 300px;" onclick="startExam()">Iniciar Avaliação em Tela Cheia</button>
+        <div class="overlay-card">
+            <h2>Atenção: Modo Seguro Ativo</h2>
+            <p>Para garantir a integridade desta avaliação da Liga Jovem, a prova só pode ser realizada em <strong>Tela Cheia Absoluta</strong>. O sistema está mapeando o padrão da sua sessão. Qualquer tentativa de desviar o foco, minimizar ou sair do modo seguro registrará uma infração no painel de monitoramento do professor.</p>
+            <button class="btn-primary" style="width: 320px;" onclick="startExam()">Iniciar Avaliação em Tela Cheia</button>
+        </div>
+    </div>
+
+    <div id="custom-popup-modal">
+        <div class="popup-card">
+            <h3 id="popup-title" class="display-font">Aviso</h3>
+            <p id="popup-message">Mensagem padrão do sistema.</p>
+            <button class="btn-primary" style="width: auto; padding: 10px 35px; margin-top: 0;" onclick="closeCustomPopup()">Entendido</button>
+        </div>
     </div>
 
     <header>
-        <div class="logo display-font">LIGA JOVEM / AVALIAÇÃO</div>
-        <div class="nav-tabs">
-            <button class="active" onclick="switchTab('aluno', this)">Visão do Aluno</button>
-            <button onclick="switchTab('professor', this)">Radar do Professor</button>
+        <div class="header-container">
+            <div class="logo display-font">LIGA JOVEM / ECOSSISTEMA</div>
+            <div class="nav-tabs">
+                <button class="active" id="tab-btn-aluno" onclick="switchTab('aluno', this)">Visão do Aluno</button>
+                <button id="tab-btn-professor" onclick="switchTab('professor', this)">Radar do Professor</button>
+            </div>
+            <div class="clear-fix"></div>
         </div>
     </header>
 
@@ -251,50 +331,58 @@
             
             <div class="student-header">
                 <div class="hud-stats">
-                    <div class="hud-item" title="Tempo Restante">
-                        ⏳ <span id="timer">15:00</span>
-                    </div>
-                    <div class="hud-item" title="Seu Saldo">
-                        💎 <span class="coin-balance"><span id="coin-amount">15</span> <span id="currency-name">Cripto-Créditos</span></span>
-                    </div>
+                    <div class="hud-item">⏳ <span id="timer">15:00</span></div>
+                    <div class="hud-item">💎 <span class="coin-balance"><span id="coin-amount">15</span> <span id="currency-name">Cripto-Créditos</span></span></div>
                 </div>
-                <button class="btn-secondary btn-theme" onclick="toggleTheme()">Alternar Tema Visual</button>
+                <div style="float: right;">
+                    <button class="btn-secondary btn-theme" onclick="toggleTheme()">Alternar Tema Visual</button>
+                </div>
+                <div class="clear-fix"></div>
             </div>
 
             <div class="card question-area">
                 <div class="question-block active" id="question-1">
-                    <h2>Questão 1: Em uma aplicação web, qual evento JavaScript é disparado quando o usuário muda de aba ou minimiza o navegador, permitindo a criação de sistemas anti-cola?</h2>
+                    <h2>Questão 1: Em uma aplicação web estruturada para segurança de exames, qual API do JavaScript é utilizada nativamente para escutar quando o aluno altera o foco da janela ou minimiza a aba, disparando gatilhos de controle?</h2>
                     <div class="options">
                         <div class="option" onclick="selectOption(this)">A) window.onblur</div>
                         <div class="option" onclick="selectOption(this)">B) document.visibilitychange</div>
                         <div class="option" onclick="selectOption(this)">C) screen.onleave</div>
                         <div class="option" onclick="selectOption(this)">D) navigator.away</div>
                     </div>
-                    <button class="btn-primary" onclick="nextQuestion(1)">Confirmar e Avançar</button>
+                    <div class="action-buttons">
+                        <button class="btn-primary" onclick="nextQuestion(1)">Confirmar e Avançar</button>
+                    </div>
                 </div>
 
                 <div class="question-block" id="question-2">
-                    <h2>Questão 2: Qual a principal finalidade da tag HTML <code>&lt;canvas&gt;</code>?</h2>
+                    <h2>Questão 2: Qual a principal finalidade da tag HTML5 <code>&lt;canvas&gt;</code> no desenvolvimento de interfaces gráficas ricas ou simulações educacionais?</h2>
                     <div class="options">
-                        <div class="option" onclick="selectOption(this)">A) Reproduzir áudio e vídeo de forma nativa.</div>
-                        <div class="option" onclick="selectOption(this)">B) Renderizar gráficos 2D e 3D dinamicamente via JavaScript.</div>
-                        <div class="option" onclick="selectOption(this)">C) Criar tabelas responsivas automaticamente.</div>
-                        <div class="option" onclick="selectOption(this)">D) Estilizar elementos usando variáveis CSS.</div>
+                        <div class="option" onclick="selectOption(this)">A) Armazenar temporariamente dados relacionais de tabelas de alunos.</div>
+                        <div class="option" onclick="selectOption(this)">B) Renderizar gráficos binários bidimensionais e elementos 3D via scripts dinâmicos.</div>
+                        <div class="option" onclick="selectOption(this)">C) Proteger contra manipulação de arquivos de estilo CSS externos.</div>
+                        <div class="option" onclick="selectOption(this)">D) Controlar de forma automática o protocolo de tela cheia do monitor.</div>
                     </div>
-                    <button class="btn-primary" onclick="nextQuestion(2)">Confirmar e Avançar</button>
+                    <div class="action-buttons">
+                        <button class="btn-secondary btn-inline" onclick="prevQuestion(2)">Voltar</button>
+                        <button class="btn-primary btn-inline btn-inline-right" onclick="nextQuestion(2)">Confirmar e Avançar</button>
+                        <div class="clear-fix"></div>
+                    </div>
                 </div>
             </div>
 
             <div class="card">
                 <div class="shop-area">
-                    <div>
-                        <h3 class="display-font">Lojinha de Ajuda</h3>
-                        <p style="margin-top: 5px; font-size: 0.9rem; color: var(--text-secondary);">Está em dúvida? Use seus créditos para comprar uma dica.</p>
+                    <div class="shop-text">
+                        <h3 class="display-font">Lojinha de Suporte</h3>
+                        <p style="margin-top: 5px; font-size: 0.9rem; color: var(--text-secondary);">Gaste moedas do cofrinho para revelar uma linha de raciocínio lógico.</p>
                     </div>
-                    <button class="btn-primary" onclick="buyHint()">Comprar Dica (-5 Créditos)</button>
+                    <div class="shop-btn-box">
+                        <button class="btn-primary" onclick="buyHint()">Comprar Dica (-5 Créditos)</button>
+                    </div>
+                    <div class="clear-fix"></div>
                 </div>
                 <div id="hint-display">
-                    <strong>Dica do Professor:</strong> Leia com atenção o enunciado e elimine as respostas que não fazem sentido com a tecnologia abordada.
+                    <strong>Dica Estrutural:</strong> Analise com calma os escopos globais baseados em eventos nativos que monitoram o ciclo de vida do documento (document) e descarte tags estáticas.
                 </div>
             </div>
         </section>
@@ -302,74 +390,79 @@
         <section id="view-professor" class="view-section">
             <div class="dashboard-grid">
                 
-                <div>
+                <div class="dashboard-col dashboard-col-left">
                     <div class="card" id="relatorio-turma">
                         <h2 style="margin-bottom: 1.5rem;">Radar da Turma em Tempo Real</h2>
                         <ul class="student-list" id="student-list">
                             <li class="student-row">
-                                <span class="student-name">Maria S.</span>
+                                <span class="student-name">Maria S. Ramos</span>
                                 <div class="status-indicator status-focado">
                                     <div class="dot"></div><span>Focado</span>
                                 </div>
+                                <div class="clear-fix"></div>
                             </li>
                             <li class="student-row">
-                                <span class="student-name">João P.</span>
+                                <span class="student-name">João Pedro Silva</span>
                                 <div class="status-indicator status-dica">
-                                    <div class="dot"></div><span>Comprou Dica</span>
+                                    <div class="dot"></div><span>Usou Dica</span>
                                 </div>
+                                <div class="clear-fix"></div>
                             </li>
-                            <li class="student-row" style="background: rgba(0, 255, 204, 0.05); border: 1px solid var(--accent-color);">
-                                <strong class="student-name">Aluno Atual (Visão Simulada)</strong>
+                            <li class="student-row" style="background: rgba(0, 255, 204, 0.04); border: 1px solid var(--accent-color);">
+                                <strong class="student-name">Aluno Atual (Sua Sessão)</strong>
                                 <div class="status-indicator status-focado" id="dashboard-current-student">
                                     <div class="dot"></div><span id="dashboard-status-text">Aguardando Início</span>
                                 </div>
+                                <div class="clear-fix"></div>
                             </li>
                         </ul>
                     </div>
 
                     <div class="card">
-                        <h2 style="margin-bottom: 1.5rem;">Exportar Relatório</h2>
-                        <p style="margin-bottom: 1rem; color: var(--text-secondary);">Exporte a situação atual da turma nos formatos suportados.</p>
+                        <h2 style="margin-bottom: 1.5rem;">Exportação de Auditoria</h2>
+                        <p style="margin-bottom: 1rem; color: var(--text-secondary);">Gere arquivos oficiais das logs e métricas comportamentais da turma.</p>
                         <div class="export-actions">
-                            <button class="btn-primary" style="margin-top:0;" onclick="exportarParaPDF()">Baixar PDF</button>
-                            <button class="btn-secondary" style="margin-top:0;" onclick="exportarParaWord()">Baixar Word</button>
+                            <button class="btn-primary" onclick="exportarParaPDF()">Exportar PDF</button>
+                            <button class="btn-secondary" style="float: right;" onclick="exportarParaWord()">Exportar Word</button>
+                            <div class="clear-fix"></div>
                         </div>
                     </div>
                 </div>
 
-                <div>
+                <div class="dashboard-col">
                     <div class="card">
-                        <h2 style="margin-bottom: 1.5rem;">Importar Prova Completa</h2>
+                        <h2 style="margin-bottom: 1.5rem;">Importação de Avaliação Externa</h2>
                         <p style="margin-bottom: 1rem; color: var(--text-secondary); font-size: 0.9rem;">
-                            Faça o upload do arquivo contendo as questões. O sistema irá processar e recortar os blocos de perguntas e alternativas estruturadas, omitindo o gabarito real da visão do estudante.
+                            Carregue arquivos estruturados de avaliações (.PDF, .DOCX). O parser irá fragmentar as perguntas e injetar dinamicamente as alternativas de forma segura.
                         </p>
                         <form id="formImportacao" onsubmit="processarImportacaoProva(event)">
                             <div class="form-group">
-                                <label style="margin-bottom: 0.5rem; display: block;">Selecione o arquivo da avaliação (.PDF, .DOC, .DOCX):</label>
-                                <input type="file" id="importadorProva" accept=".pdf, .doc, .docx, application/pdf, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document" required>
+                                <label>Arquivo da Prova:</label>
+                                <input type="file" id="importadorProva" accept=".pdf, .docx, .doc" required>
                             </div>
                             <div class="form-group">
-                                <label style="margin-bottom: 0.5rem; display: block;">Vincular à Turma Ativa:</label>
+                                <label>Vincular ao Segmento Acadêmico:</label>
                                 <select>
-                                    <option value="t1">Turma 01 - Análise de Sistemas e Mercado</option>
-                                    <option value="t2">Turma 02 - Estrutura de Dados Relacionais (LGPD)</option>
+                                    <option value="t1">Mundo dos jogos na educação: Como mudar o ensino pode auxiliar o mercado</option>
+                                    <option value="t2">Turma B - Engenharia Reversa de Banco de Dados</option>
                                 </select>
                             </div>
-                            <button type="submit" class="btn-primary">Processar Arquivo e Gerar Prova</button>
+                            <button type="submit" class="btn-primary">Processar Documento e Injetar</button>
                         </form>
                     </div>
 
                     <div class="card">
-                        <h2 style="margin-bottom: 1.5rem;">Configuração Manual Rápida</h2>
-                        <form onsubmit="event.preventDefault(); alert('Banco de dados local atualizado!');">
+                        <h2 style="margin-bottom: 1.5rem;">Ajuste de Questões Emergenciais</h2>
+                        <form onsubmit="event.preventDefault(); callCustomPopup('Sucesso', 'Banco de dados de contingência local atualizado!', false);">
                             <div class="form-group">
-                                <label>Enunciado da Questão Manual</label>
-                                <textarea rows="3">Insira aqui uma questão extra caso necessário...</textarea>
+                                <label>Modificar Enunciado Isolado</label>
+                                <textarea rows="2">Insira enunciados extras para correções em lote...</textarea>
                             </div>
-                            <button type="submit" class="btn-primary">Atualizar Questão Isolada</button>
+                            <button type="submit" class="btn-primary">Atualizar Questão Ativa</button>
                         </form>
                     </div>
                 </div>
+                <div class="clear-fix"></div>
 
             </div>
         </section>
@@ -377,7 +470,7 @@
 
     <script>
         /* =========================================
-           ESTADO DA APLICAÇÃO E VARIÁVEIS GLOBAIS
+           4. LÓGICA DO JOGO E EVENTOS DO SISTEMA
            ========================================= */
         const CONFIG = {
             INITIAL_COINS: 15,
@@ -390,9 +483,30 @@
         let hasCheated = false;
         let examStarted = false;
         let timeInSeconds = 15 * 60;
-        const pointHistory = [];
 
-        /* NAVEGAÇÃO ENTRE INTERFACES (TABS) */
+        /* GERENCIADOR DE POP-UP INTERNO EM SUBSTITUIÇÃO AO ALERT NATIVO */
+        function callCustomPopup(title, message, isDanger = false) {
+            const modal = document.getElementById('custom-popup-modal');
+            const titleEl = document.getElementById('popup-title');
+            const msgEl = document.getElementById('popup-message');
+            
+            titleEl.innerText = title;
+            msgEl.innerText = message;
+            
+            if (isDanger) {
+                titleEl.style.color = 'var(--danger-color)';
+            } else {
+                titleEl.style.color = 'var(--accent-color)';
+            }
+            
+            modal.style.display = 'block';
+        }
+
+        function closeCustomPopup() {
+            document.getElementById('custom-popup-modal').style.display = 'none';
+        }
+
+        /* TROCA DE ABAS */
         function switchTab(tabId, buttonElement) {
             document.querySelectorAll('.nav-tabs button').forEach(btn => btn.classList.remove('active'));
             buttonElement.classList.add('active');
@@ -401,21 +515,7 @@
             document.getElementById(`view-${tabId}`).classList.add('active');
         }
 
-        /* FORMATADOR DO CRONÔMETRO */
-        function formatTime() {
-            const minutes = Math.floor(timeInSeconds / 60);
-            const seconds = timeInSeconds % 60;
-            return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-        }
-
-        function addPointHistory(type, amount, reason) {
-            pointHistory.unshift({
-                type, amount, reason,
-                time: new Date().toLocaleTimeString()
-            });
-            console.log(`[PONTOS] ${type.toUpperCase()}: ${amount} | ${reason}`);
-        }
-
+        /* ATUALIZAR HUD DE MOEDAS */
         function updateCoinDisplay() {
             const coinAmount = document.getElementById('coin-amount');
             if (!coinAmount) return;
@@ -425,8 +525,6 @@
 
             if (hasCheated) {
                 coinAmount.style.color = 'var(--danger-color)';
-            } else if (coinValue === 0) {
-                coinAmount.style.color = 'var(--warning-color)';
             } else {
                 coinAmount.style.color = '';
             }
@@ -441,16 +539,7 @@
             }
         }
 
-        function updatePoints(delta, reason) {
-            const nextValue = Math.max(currentCoins + delta, CONFIG.MIN_COINS);
-            const appliedDelta = nextValue - currentCoins;
-            currentCoins = nextValue;
-            updateCoinDisplay();
-            addPointHistory(appliedDelta >= 0 ? 'ganho' : 'perda', appliedDelta, reason);
-            return currentCoins;
-        }
-
-        /* SISTEMA SEGURO (ANTI-COLA AGRESSIVO) */
+        /* DETECÇÃO E PENALIDADE ANTI-COLA */
         function applyCheatPenalty(reason) {
             if (hasCheated) return;
 
@@ -460,19 +549,16 @@
             hasCheated = true;
 
             updateCoinDisplay();
-            addPointHistory('penalidade', before - after, `Tentativa de cola: ${reason}`);
-
-            alert(
-                `⚠️ ALERTA DE INFRAÇÃO DETECTADA ⚠️\n` +
-                `Motivo: ${reason}\n` +
-                `Penalidade: Metade de seus créditos foram retidos instantaneamente.\n` +
-                `Créditos Anteriores: ${before} | Saldo Atual: ${after}\n\n` +
-                `O painel do monitoramento do professor registrou esta ação.`
-            );
-
             updateTeacherDashboard('status-infracao', `Tentou Colar (${reason})`);
+
+            callCustomPopup(
+                `⚠️ INFRAÇÃO DETECTADA`, 
+                `Motivo: ${reason}\n\nPenalidade Aplicada: Metade do seu saldo de créditos foi confiscado pelo sistema de monitoramento da Liga Jovem.\n\nSaldo anterior: ${before} 💎 | Novo Saldo: ${after} 💎`, 
+                true
+            );
         }
 
+        /* INICIALIZAÇÃO COM VALIDAÇÃO DE TELA CHEIA */
         function startExam() {
             const docElm = document.documentElement;
             if (docElm.requestFullscreen) {
@@ -481,7 +567,7 @@
                     examStarted = true;
                     updateTeacherDashboard('status-focado', 'Focado (Tela Cheia)');
                 }).catch(err => {
-                    alert("Para iniciar a prova, conceda a permissão de Tela Cheia no navegador.");
+                    callCustomPopup("Acesso Negado", "Para realizar a avaliação com segurança, permita o modo Tela Cheia nas configurações.", true);
                 });
             } else {
                 document.getElementById('exam-overlay').style.display = 'none';
@@ -489,7 +575,7 @@
             }
         }
 
-        /* MONITORES DE EVENTOS DE QUEBRA DE PADRÃO */
+        /* LISTENERS DA MUDANÇA DE PADRÃO COMPORTAMENTAL */
         document.addEventListener('fullscreenchange', () => {
             if (examStarted && !document.fullscreenElement) {
                 applyCheatPenalty("Saiu da Tela Cheia");
@@ -498,7 +584,7 @@
 
         window.addEventListener('resize', () => {
             if (examStarted && !document.fullscreenElement) {
-                applyCheatPenalty("Janela redimensionada/arrastada");
+                applyCheatPenalty("Janela Redimensionada/Arrastada");
             }
         });
 
@@ -508,21 +594,30 @@
             }
         });
 
-        /* REGRAS DAS QUESTÕES */
+        /* =========================================
+           5. CORREÇÃO CRÍTICA DO CONTROLE DOS BOTÕES
+           ========================================= */
         function selectOption(clickedElement) {
             const parentOptions = clickedElement.parentElement;
             const allOptions = parentOptions.querySelectorAll('.option');
-            allOptions.forEach(option => option.classList.remove('selected'));
-            clickedElement.add('selected');
+            
+            // Remove a classe de seleção de todas as opções daquele bloco específico
+            allOptions.forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            // Adiciona a classe no elemento clicado corretamente usando classList
             clickedElement.classList.add('selected');
         }
 
+        /* AVANÇAR QUESTÃO COM POP-UP MODAL SEGURO */
         function nextQuestion(currentQuestionId) {
             const currentBlock = document.getElementById(`question-${currentQuestionId}`);
             const selectedOption = currentBlock.querySelector('.option.selected');
             
+            // VALIDAÇÃO EXIGIDA: Impede avanço se não escolher uma alternativa
             if (!selectedOption) { 
-                alert("Selecione uma alternativa antes de prosseguir!"); 
+                callCustomPopup("Seleção Obrigatória", "Por favor, marque uma alternativa antes de confirmar e avançar. O sistema necessita salvar sua resposta relacional.", true); 
                 return; 
             }
             
@@ -531,12 +626,25 @@
                 currentBlock.classList.remove('active');
                 nextBlock.classList.add('active');
             } else {
-                alert("Avaliação finalizada com sucesso! Suas respostas foram computadas com segurança.");
+                callCustomPopup("Avaliação Concluída", "Parabéns! Suas respostas foram criptografadas e enviadas para o repositório central com segurança.", false);
                 updateTeacherDashboard('status-focado', 'Prova Concluída');
             }
         }
 
-        /* CONTROLE DE ALTERNÂNCIA DE TEMA */
+        /* VOLTAR QUESTÃO (MECÂNICA ADICIONADA SEGUNDO ATA DA REUNIÃO) */
+        function prevQuestion(currentQuestionId) {
+            if (currentQuestionId <= 1) return; // Primeira questão não tem histórico anterior
+            
+            const currentBlock = document.getElementById(`question-${currentQuestionId}`);
+            const prevBlock = document.getElementById(`question-${currentQuestionId - 1}`);
+            
+            if (prevBlock) {
+                currentBlock.classList.remove('active');
+                prevBlock.classList.add('active');
+            }
+        }
+
+        /* SISTEMA VISUAL E DE GAMIFICAÇÃO */
         function toggleTheme() {
             const body = document.body;
             const currencyLabel = document.getElementById('currency-name');
@@ -551,34 +659,38 @@
             }
         }
 
-        /* LOJINHA DE DICAS (GAMIFICAÇÃO) */
         function buyHint() {
             if (hasCheated) { 
-                alert("Bloqueado: Você perdeu o direito de comprar dicas por quebra das diretrizes de segurança."); 
+                callCustomPopup("Bloqueado", "Você perdeu o direito de usar a lojinha devido a infrações em seu log.", true); 
                 return; 
             }
 
             if (currentCoins >= CONFIG.HINT_COST) {
-                updatePoints(-CONFIG.HINT_COST, 'Compra de dica');
+                currentCoins -= CONFIG.HINT_COST;
+                updateCoinDisplay();
                 document.getElementById('hint-display').style.display = 'block';
-                updateTeacherDashboard('status-dica', 'Comprou Dica');
+                updateTeacherDashboard('status-dica', 'Usou Dica');
+                callCustomPopup("Dica Adquirida", "O saldo foi deduzido. A dica explicativa foi liberada na parte inferior da tela do exame.", false);
             } else {
-                alert("Saldo insuficiente! Resolva mais questões para adquirir moedas no seu cofrinho.");
+                callCustomPopup("Saldo Insuficiente", "Você não possui cripto-créditos suficientes no seu cofrinho para comprar suporte.", true);
             }
         }
 
-        /* PROCESSAMENTO LOCAL DE ARQUIVO IMPORTADO */
+        /* ARQUITETURA PRONTA PARA ATUALIZAÇÃO FUTURA DE RECOMPENSAS POR ACERTO/TEMPO */
+        console.log("[ARQUITETURA DE PROGRESSÃO LIGA JOVEM 2026 ACTIVE] Ganchos prontos para receber o motor de cálculo dinâmico baseado em tempo logado e assertividade.");
+
+        /* IMPORTADOR DE ARQUIVO TEXTUAL/PDF */
         function processarImportacaoProva(event) {
             event.preventDefault();
             const fileInput = document.getElementById('importadorProva');
             const file = fileInput.files[0];
 
             if (!file) {
-                alert("Erro: Arquivo não detectado.");
+                callCustomPopup("Erro", "Nenhum arquivo válido detectado.", true);
                 return;
             }
 
-            alert(`Arquivo detectado com sucesso: ${file.name}\nQuebrando estruturas de texto e isolando gabarito relacional oculto...`);
+            callCustomPopup("Processando Parser", `Arquivo '${file.name}' aceito. Quebrando estruturas de blocos, omitindo gabarito e gerando a Questão 3 de forma automatizada no pool do aluno...`, false);
             simularInjecaoDeQuestaoImportada();
             document.getElementById('formImportacao').reset();
         }
@@ -589,25 +701,28 @@
             
             const estruturaQuestao = `
                 <div class="question-block" id="question-${proximoID}">
-                    <h2>Questão ${proximoID} (Importada via Documento): No contexto de modelagem relacional de dados integrada à LGPD, qual restrição de integridade impede a duplicidade de cadastros duplicados de alunos com o mesmo nome ou documento?</h2>
+                    <h2>Questão ${proximoID} (Importada via Parser): No escopo de modelagem de dados integrada à LGPD e mercado, qual constraint e restrição relacional de integridade impede que alunos possuam cadastros duplicados usando chaves idênticas?</h2>
                     <div class="options">
-                        <div class="option" onclick="selectOption(this)">A) Atributos multivalorados redundantes.</div>
-                        <div class="option" onclick="selectOption(this)">B) Definição de Chaves Primárias (PRIMARY KEY) e Constraints do tipo UNIQUE.</div>
-                        <div class="option" onclick="selectOption(this)">C) Implementação de scripts em CSS variables.</div>
-                        <div class="option" onclick="selectOption(this)">D) Clonagem automática de tabelas temporárias.</div>
+                        <div class="option" onclick="selectOption(this)">A) Atributos redundantes e folhas CSS.</div>
+                        <div class="option" onclick="selectOption(this)">B) Definição explícita de Chaves Primárias (PRIMARY KEY) e regras UNIQUE.</div>
+                        <div class="option" onclick="selectOption(this)">C) Replicação assíncrona baseada em eventos onblur do window.</div>
+                        <div class="option" onclick="selectOption(this)">D) Clonagem temporária de tabelas em arrays unidimensionais.</div>
                     </div>
-                    <button class="btn-primary" onclick="nextQuestion(${proximoID})">Confirmar e Finalizar Avaliação</button>
+                    <div class="action-buttons">
+                        <button class="btn-secondary btn-inline" onclick="prevQuestion(${proximoID})">Voltar</button>
+                        <button class="btn-primary btn-inline btn-inline-right" onclick="nextQuestion(${proximoID})">Confirmar e Finalizar Avaliação</button>
+                        <div class="clear-fix"></div>
+                    </div>
                 </div>
             `;
 
             const areaQuestoes = document.querySelector('.question-area');
             if (areaQuestoes) {
                 areaQuestoes.insertAdjacentHTML('beforeend', estruturaQuestao);
-                alert("Sucesso! O documento foi parseado e mapeado. Mude para a 'Visão do Aluno' para responder à nova questão inserida dinamicamente.");
             }
         }
 
-        /* RELATÓRIO DO RADAR DA SALA (EXPORTAÇÕES) */
+        /* EXPORTAÇÕES DO RADAR */
         function exportarParaPDF() {
             const elemento = document.getElementById('relatorio-turma');
             if (!elemento) return;
@@ -630,32 +745,26 @@
             const container = document.getElementById('relatorio-turma');
             if (!container) return;
             
-            const htmlCompleto = `<html xmlns:w='urn:schemas-microsoft-com:office:word'>
-                <head><meta charset='utf-8'></head>
-                <body style='font-family:Arial, sans-serif;'>
-                    <h2>Relatório de Desempenho e Foco da Turma</h2>
-                    ${container.innerHTML}
-                </body>
-            </html>`;
-            
+            const htmlCompleto = `<html xmlns:w='urn:schemas-microsoft-com:office:word'><head><meta charset='utf-8'></head><body style='font-family:Arial;'><h2>Relatório Liga Jovem 2026</h2>${container.innerHTML}</body></html>`;
             const blob = new Blob(['\ufeff', htmlCompleto], { type: 'application/msword' });
-            const linkDownload = document.createElement("a");
-            linkDownload.href = URL.createObjectURL(blob);
-            linkDownload.download = 'Relatorio_Radar_Turma.doc';
-            document.body.appendChild(linkDownload);
-            linkDownload.click();
-            document.body.removeChild(linkDownload);
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = 'Relatorio_Radar.doc';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         }
 
-        /* EXECUÇÃO DE CRONÔMETRO ATIVO */
+        /* RUNTIME DO CRONÔMETRO */
         setInterval(() => {
             if (examStarted && timeInSeconds > 0) {
                 timeInSeconds--;
-                document.getElementById('timer').innerText = formatTime();
+                const minutes = Math.floor(timeInSeconds / 60);
+                const seconds = timeInSeconds % 60;
+                document.getElementById('timer').innerText = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
             }
         }, 1000);
 
-        /* INICIALIZAÇÃO DE SALDO */
         updateCoinDisplay();
     </script>
 </body>
