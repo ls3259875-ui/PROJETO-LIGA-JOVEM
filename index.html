@@ -243,7 +243,7 @@
             background-color: rgba(11, 15, 25, 0.98);
             backdrop-filter: blur(15px);
             z-index: 9999;
-            display: none; /* Inicia oculto, ativado via JS */
+            display: none;
         }
 
         [data-theme="classic"] #exam-overlay {
@@ -393,6 +393,7 @@
     </header>
 
     <main>
+        <!-- ================= PÁGINA LAYOUT HOME ================= -->
         <section id="view-home" class="view-section active">
             <div style="text-align: center; padding: 2rem 0;">
                 <h1 class="display-font" style="font-size: 2.8rem; color: var(--accent-color); margin-bottom: 0.5rem;">LIGA JOVEM 2026</h1>
@@ -400,18 +401,21 @@
             </div>
 
             <div class="dashboard-cards-container">
+                <!-- Card 1: Notas -->
                 <div class="home-card">
                     <h2 class="display-font">📊 Acesso às Notas</h2>
                     <p>Consulte suas notas, desempenho geral por disciplina e histórico de aprovações do semestre.</p>
                     <button class="btn-primary" onclick="document.getElementById('tab-btn-notas').click()">Acessar Notas</button>
                 </div>
                 
+                <!-- Card 2: Provas -->
                 <div class="home-card">
                     <h2 class="display-font">📝 Acesso às Provas</h2>
                     <p>Inicie ou retome avaliações pendentes. O ambiente requer ativação do modo seguro anti-cola.</p>
                     <button class="btn-primary" onclick="document.getElementById('tab-btn-aluno').click()">Acessar Provas</button>
                 </div>
                 
+                <!-- Card 3: Professor -->
                 <div class="home-card">
                     <h2 class="display-font">👨‍🏫 Área do Professor</h2>
                     <p>Painel administrativo para radar de turmas, importação de provas e relatórios de auditoria.</p>
@@ -420,6 +424,7 @@
             </div>
         </section>
 
+        <!-- ================= PÁGINA DE NOTAS ================= -->
         <section id="view-notas" class="view-section">
             <div class="card">
                 <div class="student-header">
@@ -476,6 +481,7 @@
             </div>
         </section>
 
+        <!-- ================= PÁGINA DO ALUNO (PROVA) ================= -->
         <section id="view-aluno" class="view-section">
             
             <div class="student-header">
@@ -536,6 +542,7 @@
             </div>
         </section>
 
+        <!-- ================= PÁGINA DO PROFESSOR ================= -->
         <section id="view-professor" class="view-section">
             <div class="dashboard-grid">
                 
@@ -630,7 +637,10 @@
         let currentCoins = CONFIG.INITIAL_COINS;
         let currentTheme = 'futuristic';
         let hasCheated = false;
+        
+        // NOVAS VARIÁVEIS DE CONTROLE DE PROVA
         let examStarted = false;
+        let examFinished = false; 
         let timeInSeconds = 15 * 60;
 
         /* GERENCIADOR DE POP-UP INTERNO EM SUBSTITUIÇÃO AO ALERT NATIVO */
@@ -657,10 +667,16 @@
 
         /* TROCA DE ABAS E SEGURANÇA DA PROVA */
         function switchTab(tabId, buttonElement) {
-            // Se tentar acessar a avaliação e ela não foi iniciada, exibe o overlay bloqueador.
-            if (tabId === 'aluno' && !examStarted) {
-                document.getElementById('exam-overlay').style.display = 'block';
-                return; // Bloqueia a mudança de aba até ele permitir a tela cheia.
+            // Se tentar acessar a avaliação e ela já foi finalizada, bloqueia e avisa.
+            if (tabId === 'aluno') {
+                if (examFinished) {
+                    callCustomPopup("Avaliação Concluída", "Você já finalizou sua prova. Suas respostas foram salvas.", false);
+                    return;
+                }
+                if (!examStarted) {
+                    document.getElementById('exam-overlay').style.display = 'block';
+                    return; // Bloqueia a mudança de aba até ele permitir a tela cheia.
+                }
             }
 
             document.querySelectorAll('.nav-tabs button').forEach(btn => btn.classList.remove('active'));
@@ -743,27 +759,50 @@
             }
         }
 
-        /* LISTENERS DA MUDANÇA DE PADRÃO COMPORTAMENTAL */
+        /* NOVA FUNÇÃO: FINALIZAR PROVA */
+        function finalizarProva(motivo) {
+            if (examFinished) return;
+            examFinished = true; // Ativa a flag de parada para o sistema anti-cola
+            
+            // Força a saída do modo tela cheia de forma nativa e sem punição
+            if (document.fullscreenElement && document.exitFullscreen) {
+                document.exitFullscreen().catch(err => console.log(err));
+            }
+
+            updateTeacherDashboard('status-focado', 'Prova Concluída');
+            
+            if (motivo === 'tempo_esgotado') {
+                callCustomPopup("Tempo Esgotado", "O tempo da sua avaliação acabou. Suas respostas foram criptografadas e enviadas para o repositório central.", false);
+            } else {
+                callCustomPopup("Avaliação Concluída", "Parabéns! Suas respostas foram criptografadas e enviadas para o repositório central com segurança.", false);
+            }
+
+            // Retorna o aluno para a página inicial
+            forceTabSwitch('home');
+        }
+
+        /* LISTENERS DA MUDANÇA DE PADRÃO COMPORTAMENTAL (AGORA COM CONDIÇÃO DE PARADA) */
         document.addEventListener('fullscreenchange', () => {
-            if (examStarted && !document.fullscreenElement) {
+            // Se a prova já terminou (!examFinished) não conta como cola sair da tela cheia
+            if (examStarted && !examFinished && !document.fullscreenElement) {
                 applyCheatPenalty("Saiu da Tela Cheia");
             }
         });
 
         window.addEventListener('resize', () => {
-            if (examStarted && !document.fullscreenElement) {
+            if (examStarted && !examFinished && !document.fullscreenElement) {
                 applyCheatPenalty("Janela Redimensionada/Arrastada");
             }
         });
 
         document.addEventListener('visibilitychange', () => {
-            if (examStarted && document.hidden) {
+            if (examStarted && !examFinished && document.hidden) {
                 applyCheatPenalty("Mudou de Aba/Minimizou");
             }
         });
 
         /* =========================================
-           5. CORREÇÃO CRÍTICA DO CONTROLE DOS BOTÕES
+           5. CONTROLE DE BOTÕES DAS QUESTÕES
            ========================================= */
         function selectOption(clickedElement) {
             const parentOptions = clickedElement.parentElement;
@@ -776,7 +815,7 @@
             clickedElement.classList.add('selected');
         }
 
-        /* AVANÇAR QUESTÃO COM POP-UP MODAL SEGURO */
+        /* AVANÇAR QUESTÃO COM POP-UP MODAL SEGURO E GATILHO DE TÉRMINO */
         function nextQuestion(currentQuestionId) {
             const currentBlock = document.getElementById(`question-${currentQuestionId}`);
             const selectedOption = currentBlock.querySelector('.option.selected');
@@ -791,8 +830,8 @@
                 currentBlock.classList.remove('active');
                 nextBlock.classList.add('active');
             } else {
-                callCustomPopup("Avaliação Concluída", "Parabéns! Suas respostas foram criptografadas e enviadas para o repositório central com segurança.", false);
-                updateTeacherDashboard('status-focado', 'Prova Concluída');
+                // Se não tiver próxima questão, dispara o encerramento da prova
+                finalizarProva('concluida');
             }
         }
 
@@ -839,9 +878,6 @@
                 callCustomPopup("Saldo Insuficiente", "Você não possui cripto-créditos suficientes no seu cofrinho para comprar suporte.", true);
             }
         }
-
-        /* ARQUITETURA PRONTA PARA ATUALIZAÇÃO FUTURA DE RECOMPENSAS POR ACERTO/TEMPO */
-        console.log("[ARQUITETURA DE PROGRESSÃO LIGA JOVEM 2026 ACTIVE] Ganchos prontos para receber o motor de cálculo dinâmico baseado em tempo logado e assertividade.");
 
         /* IMPORTADOR DE ARQUIVO TEXTUAL/PDF */
         function processarImportacaoProva(event) {
@@ -921,11 +957,17 @@
 
         /* RUNTIME DO CRONÔMETRO */
         setInterval(() => {
-            if (examStarted && timeInSeconds > 0) {
+            // O cronômetro só roda se a prova iniciou e AINDA não finalizou
+            if (examStarted && !examFinished && timeInSeconds > 0) {
                 timeInSeconds--;
                 const minutes = Math.floor(timeInSeconds / 60);
                 const seconds = timeInSeconds % 60;
                 document.getElementById('timer').innerText = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                // Se o tempo zerar, dispara a finalização da prova
+                if (timeInSeconds === 0) {
+                    finalizarProva('tempo_esgotado');
+                }
             }
         }, 1000);
 
