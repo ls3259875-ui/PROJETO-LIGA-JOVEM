@@ -168,6 +168,73 @@
         }
 
         /* =========================================
+           NOVAS ESTILIZAÇÕES (DASHBOARD & NOTAS)
+           ========================================= */
+        .dashboard-cards-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+
+        .home-card {
+            flex: 1;
+            min-width: 280px;
+            background-color: var(--surface-color);
+            border: var(--card-border);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            text-align: center;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .home-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 255, 204, 0.2);
+        }
+
+        [data-theme="classic"] .home-card:hover {
+            box-shadow: 0 12px 40px rgba(139, 69, 19, 0.2);
+        }
+
+        .home-card h2 { margin-bottom: 1rem; font-size: 1.5rem; color: var(--accent-color); }
+        .home-card p { color: var(--text-secondary); margin-bottom: 2rem; line-height: 1.5; min-height: 45px;}
+
+        .grades-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .grades-table th, .grades-table td {
+            padding: 1.2rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(0, 255, 204, 0.15);
+        }
+
+        [data-theme="classic"] .grades-table th, [data-theme="classic"] .grades-table td {
+            border-bottom: 1px solid rgba(139, 69, 19, 0.2);
+        }
+
+        .grades-table th {
+            color: var(--accent-color);
+            font-family: var(--font-display);
+            font-size: 1.1rem;
+        }
+
+        .grades-table tr:hover {
+            background-color: rgba(255, 255, 255, 0.02);
+        }
+
+        .grade-highlight {
+            font-weight: bold;
+            color: var(--warning-color);
+            font-size: 1.1rem;
+        }
+
+        /* =========================================
            2. SISTEMA DE BLOQUEIO E MODAIS EM POSIÇÃO ABSOLUTA
            ========================================= */
         #exam-overlay {
@@ -176,7 +243,7 @@
             background-color: rgba(11, 15, 25, 0.98);
             backdrop-filter: blur(15px);
             z-index: 9999;
-            display: block;
+            display: none; /* Inicia oculto, ativado via JS */
         }
 
         [data-theme="classic"] #exam-overlay {
@@ -244,7 +311,6 @@
         .option { padding: 1.2rem; border: 1px solid var(--text-secondary); border-radius: var(--border-radius); cursor: pointer; transition: var(--transition); color: var(--text-primary); margin-bottom: 1rem; display: block; }
         .option:hover { border-color: var(--accent-color); background: rgba(255, 255, 255, 0.02); }
         
-        /* Classe de seleção corrigida */
         .option.selected { 
             background-color: rgba(0, 255, 204, 0.1) !important; 
             border-color: var(--accent-color) !important; 
@@ -258,7 +324,6 @@
             color: var(--accent-color) !important; 
         }
         
-        /* Botões lado a lado estruturados sem flex/grid */
         .action-buttons { width: 100%; margin-top: 1.5rem; display: block; }
         .btn-inline { display: inline-block; width: 48%; margin-top: 0; }
         .btn-inline-right { float: right; }
@@ -270,7 +335,6 @@
         
         #hint-display { margin-top: 1rem; padding: 1rem; background-color: rgba(255, 204, 0, 0.1); border-left: 4px solid var(--warning-color); color: var(--warning-color); display: none; border-radius: 4px; clear: both; }
         
-        /* Dashboard do Professor */
         .dashboard-grid { display: block; width: 100%; }
         .dashboard-col { display: inline-block; width: 49%; vertical-align: top; }
         .dashboard-col-left { margin-right: 1%; }
@@ -319,7 +383,9 @@
         <div class="header-container">
             <div class="logo display-font">LIGA JOVEM / ECOSSISTEMA</div>
             <div class="nav-tabs">
-                <button class="active" id="tab-btn-aluno" onclick="switchTab('aluno', this)">Visão do Aluno</button>
+                <button class="active" id="tab-btn-home" onclick="switchTab('home', this)">Início</button>
+                <button id="tab-btn-notas" onclick="switchTab('notas', this)">Notas</button>
+                <button id="tab-btn-aluno" onclick="switchTab('aluno', this)">Avaliação</button>
                 <button id="tab-btn-professor" onclick="switchTab('professor', this)">Radar do Professor</button>
             </div>
             <div class="clear-fix"></div>
@@ -327,7 +393,90 @@
     </header>
 
     <main>
-        <section id="view-aluno" class="view-section active">
+        <section id="view-home" class="view-section active">
+            <div style="text-align: center; padding: 2rem 0;">
+                <h1 class="display-font" style="font-size: 2.8rem; color: var(--accent-color); margin-bottom: 0.5rem;">LIGA JOVEM 2026</h1>
+                <p style="color: var(--text-secondary); font-size: 1.2rem;">Bem-vindo ao Sistema Acadêmico e de Avaliação Gamificada</p>
+            </div>
+
+            <div class="dashboard-cards-container">
+                <div class="home-card">
+                    <h2 class="display-font">📊 Acesso às Notas</h2>
+                    <p>Consulte suas notas, desempenho geral por disciplina e histórico de aprovações do semestre.</p>
+                    <button class="btn-primary" onclick="document.getElementById('tab-btn-notas').click()">Acessar Notas</button>
+                </div>
+                
+                <div class="home-card">
+                    <h2 class="display-font">📝 Acesso às Provas</h2>
+                    <p>Inicie ou retome avaliações pendentes. O ambiente requer ativação do modo seguro anti-cola.</p>
+                    <button class="btn-primary" onclick="document.getElementById('tab-btn-aluno').click()">Acessar Provas</button>
+                </div>
+                
+                <div class="home-card">
+                    <h2 class="display-font">👨‍🏫 Área do Professor</h2>
+                    <p>Painel administrativo para radar de turmas, importação de provas e relatórios de auditoria.</p>
+                    <button class="btn-secondary" onclick="document.getElementById('tab-btn-professor').click()">Painel do Professor</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="view-notas" class="view-section">
+            <div class="card">
+                <div class="student-header">
+                    <div class="hud-stats">
+                        <div class="hud-item">🎓 <span style="color: var(--text-primary);">Boletim Escolar</span></div>
+                    </div>
+                    <div style="float: right;">
+                        <button class="btn-secondary btn-theme" onclick="toggleTheme()">Alternar Tema Visual</button>
+                    </div>
+                    <div class="clear-fix"></div>
+                </div>
+
+                <h2 class="display-font" style="margin-bottom: 1rem; color: var(--accent-color);">Desempenho Atual</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">Consulte o histórico atualizado das suas avaliações gamificadas e testes regulares.</p>
+
+                <table class="grades-table">
+                    <thead>
+                        <tr>
+                            <th>Disciplina</th>
+                            <th>Nota (0-10)</th>
+                            <th>Situação</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Matemática Aplicada</td>
+                            <td class="grade-highlight">9,0</td>
+                            <td>✅ Aprovado</td>
+                        </tr>
+                        <tr>
+                            <td>Língua Portuguesa</td>
+                            <td class="grade-highlight">8,5</td>
+                            <td>✅ Aprovado</td>
+                        </tr>
+                        <tr>
+                            <td>Física Computacional</td>
+                            <td class="grade-highlight">7,8</td>
+                            <td>✅ Aprovado</td>
+                        </tr>
+                        <tr>
+                            <td>Lógica de Programação</td>
+                            <td class="grade-highlight">9,8</td>
+                            <td>✅ Aprovado com Louvor</td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td style="font-weight: bold; font-family: var(--font-display); padding-top: 2rem;">Média Geral do Aluno:</td>
+                            <td style="font-weight: bold; color: var(--accent-color); padding-top: 2rem; font-size: 1.2rem;">8,7</td>
+                            <td style="padding-top: 2rem;">⭐ Excelente</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </section>
+
+        <section id="view-aluno" class="view-section">
             
             <div class="student-header">
                 <div class="hud-stats">
@@ -506,13 +655,30 @@
             document.getElementById('custom-popup-modal').style.display = 'none';
         }
 
-        /* TROCA DE ABAS */
+        /* TROCA DE ABAS E SEGURANÇA DA PROVA */
         function switchTab(tabId, buttonElement) {
+            // Se tentar acessar a avaliação e ela não foi iniciada, exibe o overlay bloqueador.
+            if (tabId === 'aluno' && !examStarted) {
+                document.getElementById('exam-overlay').style.display = 'block';
+                return; // Bloqueia a mudança de aba até ele permitir a tela cheia.
+            }
+
             document.querySelectorAll('.nav-tabs button').forEach(btn => btn.classList.remove('active'));
-            buttonElement.classList.add('active');
+            if(buttonElement) buttonElement.classList.add('active');
 
             document.querySelectorAll('.view-section').forEach(view => view.classList.remove('active'));
             document.getElementById(`view-${tabId}`).classList.add('active');
+        }
+
+        /* FORÇA TROCA DE ABA VIA BOTÃO DE AÇÕES EXTERNAS */
+        function forceTabSwitch(tabId) {
+            document.querySelectorAll('.nav-tabs button').forEach(btn => btn.classList.remove('active'));
+            const targetBtn = document.getElementById(`tab-btn-${tabId}`);
+            if(targetBtn) targetBtn.classList.add('active');
+
+            document.querySelectorAll('.view-section').forEach(view => view.classList.remove('active'));
+            const targetView = document.getElementById(`view-${tabId}`);
+            if(targetView) targetView.classList.add('active');
         }
 
         /* ATUALIZAR HUD DE MOEDAS */
@@ -566,12 +732,14 @@
                     document.getElementById('exam-overlay').style.display = 'none';
                     examStarted = true;
                     updateTeacherDashboard('status-focado', 'Focado (Tela Cheia)');
+                    forceTabSwitch('aluno'); // Transita para a aba de avaliação
                 }).catch(err => {
                     callCustomPopup("Acesso Negado", "Para realizar a avaliação com segurança, permita o modo Tela Cheia nas configurações.", true);
                 });
             } else {
                 document.getElementById('exam-overlay').style.display = 'none';
                 examStarted = true;
+                forceTabSwitch('aluno');
             }
         }
 
@@ -601,12 +769,10 @@
             const parentOptions = clickedElement.parentElement;
             const allOptions = parentOptions.querySelectorAll('.option');
             
-            // Remove a classe de seleção de todas as opções daquele bloco específico
             allOptions.forEach(option => {
                 option.classList.remove('selected');
             });
             
-            // Adiciona a classe no elemento clicado corretamente usando classList
             clickedElement.classList.add('selected');
         }
 
@@ -615,7 +781,6 @@
             const currentBlock = document.getElementById(`question-${currentQuestionId}`);
             const selectedOption = currentBlock.querySelector('.option.selected');
             
-            // VALIDAÇÃO EXIGIDA: Impede avanço se não escolher uma alternativa
             if (!selectedOption) { 
                 callCustomPopup("Seleção Obrigatória", "Por favor, marque uma alternativa antes de confirmar e avançar. O sistema necessita salvar sua resposta relacional.", true); 
                 return; 
@@ -631,9 +796,8 @@
             }
         }
 
-        /* VOLTAR QUESTÃO (MECÂNICA ADICIONADA SEGUNDO ATA DA REUNIÃO) */
         function prevQuestion(currentQuestionId) {
-            if (currentQuestionId <= 1) return; // Primeira questão não tem histórico anterior
+            if (currentQuestionId <= 1) return;
             
             const currentBlock = document.getElementById(`question-${currentQuestionId}`);
             const prevBlock = document.getElementById(`question-${currentQuestionId - 1}`);
